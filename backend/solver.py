@@ -14,7 +14,6 @@ RESERVED_FUNCTIONS = {
 
 class FormulaSolver:
     def __init__(self):
-        """Initialize empty solver - stores state between method calls"""
         self.formula_string: Optional[str] = None
         self.variables_list: list[str] = []
         self.symbols_dict: dict = {}
@@ -29,6 +28,11 @@ class FormulaSolver:
         self.is_const: Optional[bool] = False
         self.is_one_var: Optional[bool] = False
         self.is_multi_var: Optional[bool] = False
+        self.equation_type: Optional[str] = ""
+        self.x_values: list[float] = []
+        self.y_values: list[float] = []
+        self.skipped: list[float] = []
+        self.fixed: dict = {}
         
     
     
@@ -84,9 +88,11 @@ class FormulaSolver:
             "needs_choice": False,
             "error": "No formula set. Call set_formula() first.",
             "available": self.variables_list, 
-            "target": target
+            "target": target, 
+            "formula_string": self.formula_string, 
+            "required_list_str":[]
             }
-            
+   
         if not target in self.variables_list:
             return {
             "status": "error",
@@ -95,8 +101,11 @@ class FormulaSolver:
             "needs_choice": False,
             "error": f"Variable '{target}' not found in formula. Available: {', '.join(self.variables_list)}",
             "available": self.variables_list, 
-            "target": target
+            "required_list_str":[], 
+            "target": target, 
+            "formula_string": self.formula_string
             }
+
         symbol = self.symbols_dict[target]
         try:
             solutions = sp.solve(self.equation, symbol)
@@ -108,20 +117,28 @@ class FormulaSolver:
                         "solutions": [],
                         "needs_choice": False,
                         "error": f"No solutions found for {target}", 
-                        "target": target
+                        "target": target, 
+                        "available": self.variables_list, 
+                        "required_list_str": [], 
+                        "formula_string": self.formula_string
                         }
                 
             # One solution
             elif len(solutions) == 1:
                 self.target_variable = target
                 self.solved_expression = solutions[0]
+                self.required_list_str = self._get_required_variables()
+                self.solutions_list = solutions
                 return {
                     "status": "success",
                     "status_bool" : True, 
                     "solutions": [str(solutions[0])],
                     "needs_choice": False,
                     "error": "", 
-                    "target": target
+                    "target": target,
+                    "available": self.variables_list,  
+                    "required_list_str": self.required_list_str, 
+                    "formula_string": self.formula_string
                     }
                 
             # Multiple solutions
@@ -134,7 +151,11 @@ class FormulaSolver:
                     "solutions": [str(sol) for sol in solutions],
                     "needs_choice": True,
                     "error": "", 
-                    "target": target
+                    "target": target, 
+                    "available": self.variables_list, 
+                    "required_list_str": [], 
+                    "formula_string": self.formula_string
+                    
                     }
             
         except Exception as e:
@@ -144,40 +165,58 @@ class FormulaSolver:
                 "solutions": [],
                 "needs_choice": False,
                 "error": f"Solving error: {str(e)}", 
-                "target": target
+                "target": target, 
+                "available": self.variables_list, 
+                "required_list_str": [], 
+                "formula_string": self.formula_string
                 }
-    
     
     def choose_solution(self, index: int) -> dict:
         try:
             if not self.solutions_list:
                 return {
-                "status": "error",
-                "status_bool" : False, 
-                "solution": "",
-                "error": "No multiple solutions to choose from", 
-                "index": index
-                    }
-                
+                    "status": "error",
+                    "status_bool": False,
+                    "solution": "",
+                    "error": "No multiple solutions to choose from",
+                    "index": index,
+                    "formula_string": self.formula_string
+                }
+            
             if 0 <= index < len(self.solutions_list):
                 self.solved_expression = self.solutions_list[index]
+                self.required_list_str = self._get_required_variables()
                 return {
                     "status": "success",
-                    "status_bool" : True, 
+                    "status_bool": True,
                     "solution": str(self.solved_expression),
-                    "error": "", 
-                    "index": index
-                    }
-
-                
+                    "error": "",
+                    "index": index,
+                    "required_list_str": self.required_list_str,
+                    "formula_string": self.formula_string
+                }
+            else:
+                return {
+                    "status": "error",
+                    "status_bool": False,
+                    "solution": "",
+                    "error": f"Invalid index {index}. Must be between 0 and {len(self.solutions_list) - 1}",
+                    "index": index,
+                    "required_list_str": [],
+                    "formula_string": self.formula_string
+                }
+    
         except (KeyError, IndexError):
             return {
                 "status": "error",
-                "status_bool" : False, 
+                "status_bool": False,
                 "solution": "",
-                "error": "Invalid index.", 
-                "index": index
-                }
+                "error": "Invalid index.",
+                "index": index,
+                "formula_string": self.formula_string,
+                "required_list_str": self.required_list_str
+            }
+
     
     def get_required_variables(self) -> list:
         if self.solved_expression is None:
@@ -194,21 +233,34 @@ class FormulaSolver:
             self.is_const = True
             self.is_one_var = False
             self.is_multi_var = False
-            self.sweeper = sweeper  
+            self.sweeper = None
+            self.equation_type = "constant"
             return {
-                "status": "success", 
+                "status": "success",
+                "status_bool": True,
+                "is_const": self.is_const, 
+                "is_one_var": self.is_one_var, 
+                "is_multi_var": self.is_multi_var, 
                 "required_list_str": [],
                 "sweeper": self.sweeper,
-                "equation_type": "constant", 
-                "error": ""
+                "equation_type": self.equation_type , 
+                "error": "", 
+                "required_list_final_str": []
             }
         
         if sweeper not in required_list_str:
+            self.equation_type = ""
             return {
-                "status": "error", 
+                "status": "error",
+                "status_bool": False,
+                "is_const": self.is_const, 
+                "is_one_var": self.is_one_var, 
+                "is_multi_var": self.is_multi_var, 
                 "required_list_str": required_list_str,
                 "sweeper": None,
-                "error": f"sweeper '{sweeper}' not in {required_list_str}"
+                "equation_type":"", 
+                "error": f"sweeper '{sweeper}' not in {required_list_str}", 
+                "required_list_final_str": []
             }
             
         if len(required_list_str) == 1:
@@ -216,15 +268,21 @@ class FormulaSolver:
             self.is_one_var = True
             self.is_multi_var = False
             self.sweeper = sweeper
+            self.equation_type = "one_variable"
             return {
                 "status": "success", 
-                "required_list_str": [],
+                "status_bool": True,
+                "is_const": self.is_const, 
+                "is_one_var": self.is_one_var, 
+                "is_multi_var": self.is_multi_var, 
+                "required_list_str": self.required_list_str,
                 "sweeper": self.sweeper,
-                "equation_type": "one_variable",  
-                "error": ""
+                "equation_type": self.equation_type,  
+                "error": "", 
+                "required_list_final_str":[]
             }
         
-        # Multiple variables (>= 2)
+        # Multiple variables
         if len(required_list_str) >= 2:
             self.is_const = False
             self.is_one_var = False
@@ -232,11 +290,17 @@ class FormulaSolver:
             required_list_final_str = list(set(required_list_str) - {sweeper})
             self.required_list_final = required_list_final_str
             self.sweeper = sweeper
+            self.equation_type = "multi_variable"
             return {
-                "status": "success", 
-                "required_list_str": required_list_final_str,
+                "status": "success",
+                "status_bool":True,
+                "is_const": self.is_const, 
+                "is_one_var": self.is_one_var, 
+                "is_multi_var": self.is_multi_var, 
+                "required_list_str": required_list_str,
+                "required_list_final_str": required_list_final_str,
                 "sweeper": self.sweeper,
-                "equation_type": "multi_variable",  
+                "equation_type": self.equation_type,  
                 "error": ""
             }
 
@@ -298,7 +362,7 @@ class FormulaSolver:
         
         
     def perform_sweep(self,
-                     start: float, end: float, steps: int) -> dict:
+                     start: float, end: float, steps: int ) -> dict:
         errorlist = []
         skipped = []
         sweeper = self.sweeper
@@ -346,7 +410,9 @@ class FormulaSolver:
                 except(TypeError, ValueError, ZeroDivisionError, Exception) as e:
                     skipped.append(x_value)
                     continue   
-                
+            self.x_values = x_values
+            self.y_values = y_values
+            self.skipped = skipped    
             return {
                     "status": "success",
                     "x_values": x_values,
@@ -366,6 +432,9 @@ class FormulaSolver:
                 except (TypeError, ValueError, ZeroDivisionError, Exception) as e:
                     skipped.append(x_value)
                     continue
+            self.x_values = x_values
+            self.y_values = y_values
+            self.skipped = skipped
             return {
                 "status": "success",
                 "x_values": x_values,
@@ -380,7 +449,7 @@ class FormulaSolver:
     
     
     
-    # ========== PRIVATE HELPER METHODS ==========
+    # ========== PRIVATE METHODS ==========
     
     def _validate_syntax(self, formula_string: str) -> bool:
         if not formula_string:
@@ -443,8 +512,7 @@ class FormulaSolver:
         required_list = self.solved_expression.free_symbols
         required_list_str = [s.name for s in required_list]
         return sorted(required_list_str)
-    
-# ========== TESTING CODE ==========
+
 
 
 

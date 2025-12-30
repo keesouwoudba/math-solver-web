@@ -64,7 +64,7 @@ while True:
                 print(f"{ps_response["error"]}")
                 print(f"choose from {solver.required_list_str}")
                 continue
-            required_list_final_str = ps_response["required_list_str"]
+            required_list_final_str = ps_response["required_list_final_str"]
             equation_type = ps_response["equation_type"]
             break
         fixed = {}
@@ -82,7 +82,7 @@ while True:
                     continue
                 break
                         
-            except Exception as E:
+            except Exception as e:
                 print(f"error {e} happened")
                 
         while True:
