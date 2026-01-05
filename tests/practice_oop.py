@@ -1,23 +1,19 @@
-
-class Car:
-    def __init__(self, brand, model, year):
-        self.brand = brand
-        self.model = model
-        self.year = year
-        
-       
-    
-    def start(self):
-        return f"the brand {self.brand} {self.model} is starting"
-    
-    def stop(self):
-        return f"the brand {self.brand} {self.model} is stopping"
-    
-    def get_info(self):
-        return f"{self.year} {self.brand} {self.model}"
+def validate_keys(*required_keys):  #name, age
+    def decorator(func):            
+        def wrapper(*args, **kwargs): 
+            data = args[0] 
+            for key in required_keys:
+                if key not in data:
+                    print(f"Error: Missing required key: {key}")
+                    return None
+            return func(*args, **kwargs)
+        return wrapper
+    return decorator
 
 
-my_car = Car("Toyota", "Camry", 2020)
-print(my_car.start())
-print(my_car.get_info())
-print(my_car.stop())
+
+@validate_keys('name', 'age')
+def process_user(data):
+    return f"User {data['name']} is {data['age']} years old"
+
+print(process_user({'name': 'John'}))  # Missing 'age'
