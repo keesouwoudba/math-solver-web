@@ -6,9 +6,6 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from functools import wraps
-import redis
-import json
-import uuid
 
 app = Flask(__name__)
 
@@ -18,9 +15,6 @@ app.config['SESSION_COOKIE_HTTPONLY'] = True  # Security: prevent JavaScript acc
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # Security: CSRF protection
 
 CORS(app, supports_credentials=True)
-
-
-r = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
 
 """require specific preconditions for  run"""
 def require_json(func):
@@ -103,29 +97,30 @@ def require_types(**field_types):
     return decorator
 
 """"helper/saver methods"""
+
+def _solver_to_session_dict(solver: FormulaSolver) -> dict:
+    # Keep session payload small: large arrays can exceed browser cookie limits.
+    data = solver.to_dict()
+    data["x_values"] = []
+    data["y_values"] = []
+    data["skipped"] = []
+    return data
+
+
 def get_solver_from_session():
     """
-    Load solver from Redis using session ID
+    Load solver from Flask session cookie.
     Returns: (solver, error_dict) - if error_dict is not None, return it as error response
     """
-    solver_id = session.get("solver_id")
-    if not solver_id:
+    solver_dict = session.get("solver_data")
+    if not solver_dict:
         return None, {
             "status": "error",
             "status_bool": False,
             "error": "No solver session found. Call /api/set_formula first."
         }
-    
-    solver_json = r.get(f"solver:{solver_id}")
-    if not solver_json:
-        return None, {
-            "status": "error",
-            "status_bool": False,
-            "error": "Solver session expired. Please start over with /api/set_formula."
-        }
-    
+
     try:
-        solver_dict = json.loads(solver_json)
         solver = FormulaSolver.from_dict(solver_dict)
         return solver, None
     except Exception as e:
@@ -136,10 +131,8 @@ def get_solver_from_session():
         }
 
 def save_solver_to_session(solver):
-    """Save solver to Redis"""
-    solver_id = session.get("solver_id")
-    if solver_id:
-        r.set(f"solver:{solver_id}", json.dumps(solver.to_dict()))
+    """Save solver state to Flask session cookie"""
+    session["solver_data"] = _solver_to_session_dict(solver)
 
 
 
@@ -180,15 +173,12 @@ def set_formula():
         
         if not sf_result["status_bool"]:
             return jsonify(sf_result), 400
-        
-        solver_id = str(uuid.uuid4())
-        r.set(f"solver:{solver_id}", json.dumps(solver.to_dict()))
-        
-        session["solver_id"] = solver_id
+
+        save_solver_to_session(solver)
         
         #DEBUG_MODE - Remove in production
         if app.debug:
-            sf_result["debug_solver_id"] = solver_id
+            sf_result["debug_session"] = "cookie"
         
         return jsonify(sf_result), 200
         
@@ -252,7 +242,7 @@ def solve_for_target():
         
         #DEBUG_MODE - Remove in production
         if app.debug:
-            sft_response["debug_solver_id"] = session.get("solver_id")
+            sft_response["debug_session"] = "cookie"
         
         return jsonify(sft_response), 200
         
@@ -365,7 +355,7 @@ def choose_solution():
         
         #DEBUG_MODE - Remove in production
         if app.debug:
-            cs_response["debug_solver_id"] = session.get("solver_id")
+            cs_response["debug_session"] = "cookie"
         
         return jsonify(cs_response), 200
         
@@ -490,7 +480,7 @@ def pass_sweeper():
 
         #DEBUG_MODE - Remove in production
         if app.debug:
-            response["debug_solver_id"] = session.get("solver_id")
+            response["debug_session"] = "cookie"
         
         return jsonify(response), 200
         
@@ -599,7 +589,7 @@ def verify_fixed():
         
         #DEBUG_MODE - Remove in production
         if app.debug:
-            response["debug_solver_id"] = session.get("solver_id")
+            response["debug_session"] = "cookie"
         
         return jsonify(response), 200
         

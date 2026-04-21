@@ -14,6 +14,7 @@ Python backend and a lightweight frontend.
 -   Web interface
 -   Python backend
 -   API endpoint
+-   Cookie-based session state (no Redis required)
 -   Unit tests
 
 ------------------------------------------------------------------------
@@ -39,6 +40,9 @@ math-solver-web
 
 pip install -r requirements.txt
 
+Note: Redis is not required in the current version. Solver state is stored
+in Flask signed session cookies.
+
 ------------------------------------------------------------------------
 
 ▶️ Run Backend
@@ -46,6 +50,22 @@ pip install -r requirements.txt
 cd backend python app.py
 
 Server will start on: http://localhost:5000
+
+Session behavior:
+
+-   Backend stores solver state in browser cookies via Flask sessions.
+-   Frontend requests must include credentials to keep the same session.
+
+Example fetch config:
+
+```javascript
+fetch("http://localhost:5000/api/set_formula", {
+	method: "POST",
+	credentials: "include",
+	headers: { "Content-Type": "application/json" },
+	body: JSON.stringify({ formula_string: "S=v*t" })
+});
+```
 
 ------------------------------------------------------------------------
 
