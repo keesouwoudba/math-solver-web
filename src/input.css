@@ -1,0 +1,63 @@
+@import "tailwindcss";
+
+/* main page styles */
+main-page {
+    @apply flex flex-1 w-full mx-auto flex-col items-center justify-center p-[clamp(1rem,5vw,2.5rem)] text-[#191c1e] bg-[#f7f9fb];
+    font-family: Inter, sans-serif;
+}
+
+main-page * {
+    @apply box-border;
+}
+
+.hero {
+    @apply w-full mx-auto mb-16 text-center;
+}
+
+.hero-title {
+    @apply m-0 mb-6 text-[clamp(2rem,5vw,2.5rem)] leading-[1.2] font-normal text-[#191c1e];
+    font-family: Newsreader, serif;
+}
+
+.hero-copy {
+    @apply m-0 mx-auto max-w-2xl text-lg leading-normal font-normal text-[#44474e];
+    font-family: Newsreader, serif;
+}
+
+.window-launch-solver {
+    @apply w-full max-w-88 sm:max-w-md md:max-w-136 lg:max-w-2xl;
+}
+
+.box-launch-solver {
+    @apply relative block overflow-hidden border border-[#e0e3e5] rounded-sm bg-white p-5 sm:p-7 md:p-8 lg:p-10 outline-none transition-[box-shadow,transform] duration-200 ease-in-out;
+}
+
+.box-launch-solver:hover {
+    @apply shadow-[0_4px_20px_rgba(15,23,42,0.05)];
+}
+
+.box-launch-solver:focus-visible {
+    @apply outline-2 outline-[#003a82] outline-offset-2;
+}
+
+.solver-title {
+    @apply m-0 mb-3 sm:mb-4 text-[1.4rem] sm:text-[1.65rem] md:text-[1.85rem] lg:text-[2rem] leading-tight font-semibold text-[#191c1e];
+    font-family: "Space Grotesk", sans-serif;
+}
+
+.solver-description {
+    @apply m-0 mb-6 sm:mb-7 md:mb-8 max-w-full sm:max-w-[92%] md:max-w-[85%] lg:max-w-[80%] text-sm sm:text-[0.95rem] md:text-base leading-relaxed font-normal text-[#44474e];
+}
+
+.solver-cta {
+    @apply m-0 inline-flex items-center gap-1.5 sm:gap-2 text-[0.68rem] sm:text-xs leading-none tracking-wider font-semibold uppercase text-[#0f2846];
+}
+
+.solver-cta-icon {
+    @apply inline-flex items-center justify-center text-base transition-transform duration-200 ease-in-out;
+}
+
+.box-launch-solver:hover .solver-cta-icon {
+    @apply translate-x-0.5;
+}
+

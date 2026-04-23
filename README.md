@@ -14,7 +14,7 @@ Python backend and a lightweight frontend.
 -   Web interface
 -   Python backend
 -   API endpoint
--   Cookie-based session state (no Redis required)
+-   Cookie-based session state
 -   Unit tests
 
 ------------------------------------------------------------------------

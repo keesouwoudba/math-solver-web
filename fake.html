@@ -1,0 +1,63 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Tab Demo</title>
+  
+</head>
+<body>
+
+<div class="tabs-container">
+
+  <!-- Tab buttons — first one has "active" class by default -->
+  <div class="tab-buttons">
+    <button class="tab-btn active" data-target="panel1">Tab 1</button>
+    <button class="tab-btn"        data-target="panel2">Tab 2</button>
+    <button class="tab-btn"        data-target="panel3">Tab 3</button>
+    <button class="tab-btn"        data-target="panel4">Tab 4</button>
+  </div>
+
+  <!-- Panel 1 is visible by default (has "active" class) -->
+  <div class="tab-panel active" id="panel1">
+    <h3>Panel 1</h3>
+    <p>Your content for tab 1 goes here.</p>
+  </div>
+
+  <!-- Panels 2, 3, 4 are hidden until their tab is clicked -->
+  <div class="tab-panel" id="panel2">
+    <h3>Panel 2</h3>
+    <p>Your content for tab 2 goes here.</p>
+  </div>
+
+  <div class="tab-panel" id="panel3">
+    <h3>Panel 3</h3>
+    <p>Your content for tab 3 goes here.</p>
+  </div>
+
+  <div class="tab-panel" id="panel4">
+    <h3>Panel 4</h3>
+    <p>Your content for tab 4 goes here.</p>
+  </div>
+
+</div>
+
+<script>
+  const buttons = document.querySelectorAll('.tab-btn');
+  const panels  = document.querySelectorAll('.tab-panel');
+
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      // remove active from all buttons and panels
+      buttons.forEach(b => b.classList.remove('active'));
+      panels.forEach(p  => p.classList.remove('active'));
+
+      // activate clicked button and its matching panel
+      btn.classList.add('active');
+      document.getElementById(btn.dataset.target).classList.add('active');
+    });
+  });
+</script>
+
+</body>
+</html>

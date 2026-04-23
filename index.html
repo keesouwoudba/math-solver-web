@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MathSolver</title>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Newsreader:wght@400&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+
+    <script src="app.js" defer type="module"></script>
+    <link href="./dist/output.css" rel="stylesheet">
+
+</head>
+<body class="min-h-screen flex flex-col">
+    <header class="bg-slate-50 dark:bg-slate-900 docked full-width top-0 border-b border-slate-200 dark:border-slate-800 flat no shadows font-['Space_Grotesk'] tracking-tight">
+        <div class="flex justify-between items-center w-full px-6 py-4 max-w-9xl mx-auto">
+            <div class="flex items-center gap-2">
+                <span aria-hidden="true" class="material-symbols-outlined text-slate-800 dark:text-slate-100" data-icon="function">function</span>
+                <span class="text-xl font-bold text-slate-900 dark:text-white">MathSolver</span>
+            </div>
+            <div>
+                <a class="navlink text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 underline transition-all cursor-pointer" href="#help">Help</a>
+            </div>
+        </div>
+    </header>
+    <main class="flex-1 flex">
+    </main>
+
+    <template id="main-page-template">
+        <section class="hero">
+            <h1 class="hero-title">Computational Confidence.</h1>
+            <p class="hero-copy">
+                Engineered for intellectual rigor. Visualize equations, analyze behavior,
+                and solve complex formulas step-by-step with clinical precision.
+            </p>
+        </section>
+        <section class="window-launch-solver">
+            <a class="box-launch-solver" href="/solver" tabindex="0" aria-label="Launch Equation Solver">
+                <h2 class="solver-title">Equation Solver</h2>
+                <p class="solver-description">
+                    Solve complex formulas step-by-step. Uncover the underlying logic with
+                    transparent computational pathways.
+                </p>
+                <p class="solver-cta">
+                    <span class="solver-cta-label">Launch Solver</span>
+                    <span class="material-symbols-outlined solver-cta-icon" data-icon="arrow_forward" aria-hidden="true">arrow_forward</span>
+                </p>
+            </a>
+        </section>
+    </template>
+
+    <footer class="bg-slate-50 dark:bg-slate-900 full-width border-t border-slate-200 dark:border-slate-800 flat no shadows font-['Space_Grotesk'] text-sm w-full py-8 px-6 mt-auto flex flex-col md:flex-row justify-between items-center gap-4">
+        <div class="text-sm font-semibold text-slate-700 dark:text-slate-300">© 2026 MathSolver. All rights reserved.</div>
+        <nav class="flex gap-6">
+            <a class="navlink text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 underline transition-all cursor-pointer" href="/docs">Documentation</a>
+            <a class="navlink text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 underline transition-all cursor-pointer" href="/terms">Terms</a>
+            <a class="navlink text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 underline transition-all cursor-pointer" href="/contacts">Contacts</a>
+            <a class="navlink text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 underline transition-all cursor-pointer" href="/bug">Report a Bug</a>
+        </nav>
+    </footer>
+</body>
+</html>

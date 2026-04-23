@@ -412,10 +412,10 @@ def pass_sweeper():
         solver, error = get_solver_from_session()
         if error:
             return jsonify(error), 400
-    
+
         sweeper = request.json["sweeper"]
         
-       
+        
         if solver.is_const:
             return jsonify({
                 "status": "error",
