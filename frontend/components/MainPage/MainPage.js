@@ -1,12 +1,12 @@
-const $ = function(args){ return document.querySelector(args);}
-const $$ = function(args){ return document.querySelectorAll(args);}
-//returns nodelist, thats why do [...el.$("needed")] to make it array with methods like map filter.
+function $(args) { return document.querySelector(args); }
+function $$(args) { return document.querySelectorAll(args);}
 
 
 export class MainPage extends HTMLElement {
     constructor(){
         super();
     }
+
     connectedCallback(){
         const template = $("#main-page-template");
         if (!template) return;
@@ -16,7 +16,7 @@ export class MainPage extends HTMLElement {
     }
 
     attachEventListeners(){
-        const solverLink = this.querySelector(".box-launch-solver");
+        const solverLink = $(".box-launch-solver");
         if (!solverLink) return;
 
         solverLink.on("click", (event) => {

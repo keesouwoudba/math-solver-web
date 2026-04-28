@@ -518,3 +518,23 @@ Use this as the practical coding order so each step unlocks the next.
 - Test refresh behavior and history recovery.
 - Test empty/missing/invalid inputs.
 - Test mobile + desktop responsive behavior.
+
+## 15) TODO Next Session
+i need to create such patcher that:
+if tagname and id is the same, i should replace recursively value, className, textContent and look at children separately for each. 
+
+else:
+replace the whole node like i did in patch  
+
+
+
+1. Refactor VDOM patcher to apply minimal in-place updates when node identity matches (`tag` + `id`) instead of replacing whole nodes.
+2. Implement recursive `patchNode` flow:
+- patch changed fields (`value`, `textContent`, `className`, attributes)
+- recurse into children only for changed branches
+- replace element only if identity/tag mismatch
+3. Preserve textarea UX:
+- update `textarea.value` in place
+- keep focus and caret stable during typing
+4. Keep delegated listeners on `this.root` for events that must survive node patching.
+5. Keep `valueRef.current` generic contract in VDOM nodes so state references stay reusable across pages.
