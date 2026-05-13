@@ -1,5 +1,8 @@
 import VDOMService from "../../services/vDOMService.js";
 import PopupService from "../../services/PopupService.js";
+import API from "../../services/API.js";
+import Router from "../../services/Router.js";
+import UiPopup from "../UiPopup/UiPopup.js";
 
 export class SolverHomePage extends HTMLElement {
   MyVDOMService;
@@ -8,6 +11,7 @@ export class SolverHomePage extends HTMLElement {
   elems;
   data;
   vDOM;
+  jsonDataSolverHomePage;
   inputStateRef = {
     current: "",
     selectionStart: 0,
@@ -227,9 +231,11 @@ export class SolverHomePage extends HTMLElement {
           isVisible: false,
           message: "",
         },
+        jsonDataSolverHomePage: this.jsonDataSolverHomePage,
       };
       this.MyVDOMService = new VDOMService(this.root, this.data);
       this.MyPopupService = new PopupService(this.root, this.data);
+      window.app.SolverHomePageData = this.data;
     };
 
     loadCSS();
@@ -465,9 +471,9 @@ export class SolverHomePage extends HTMLElement {
     //add event listener for solve button
     const solveBtn = this.root.querySelector("#btn-solve");
     if (solveBtn) {
-      solveBtn.addEventListener("click", () => {
+      solveBtn.addEventListener("click", async () => {
         //step1: validate user current input. (TODO: create a new helper validateSyntax like my python code in comments)
-        //step2: if validation is good, shown popup: to be implemented further
+        //step2: call api to set the formula
         //step3: if validation is bad, show popup with the error mesage and real problem user had in syntax
 
         //step1:
@@ -475,9 +481,30 @@ export class SolverHomePage extends HTMLElement {
 
         //step2:
         if (isValid) {
-          this.MyPopupService.showDefaultPopup(
-            "Validation successful! Everything else to be implemented later",
+          const responseData = await API.setFormula(
+            this.data.inputStateRef.current,
           );
+          if (responseData.ok) {
+            console.log(`SolverHomePage: set formula response ok`);
+          }
+          const jsonDataSolverHomePage = responseData.data;
+          if (jsonDataSolverHomePage) {
+            console.log(`SolverHomePage: Server response indicates success`);
+            // we are supposed to take the variables from the equation and move to the next page (for choosing the varibales)
+            this.jsonDataSolverHomePage = jsonDataSolverHomePage;
+            window.app.jsonDataSolverHomePage = jsonDataSolverHomePage;
+            const { variables, status_bool, valid, error, formula_string } =
+              jsonDataSolverHomePage;
+
+            if (status_bool && valid) {
+              Router.go("/solver/variables");
+            } else {
+              //step 3
+              this.MyPopupService.showErrorPopup(
+                `Validation failed: ${error || "unknown error"}, formula string: ${formula_string || "not provided"}, variables parsed: ${variables ? variables.join(", ") : "not provided"}`,
+              );
+            }
+          }
         } else {
           //step 3
           this.MyPopupService.showErrorPopup(

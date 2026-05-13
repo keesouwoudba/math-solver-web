@@ -1,4 +1,4 @@
-export class UiPopup extends HTMLElement {
+export default class UiPopup extends HTMLElement {
   MyPopupService;
   constructor() {
     super();

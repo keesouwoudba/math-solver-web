@@ -8,8 +8,10 @@ import PopupService from "/frontend/services/PopupService.js";
 //link components
 import { MainPage } from "/frontend/components/MainPage/MainPage.js";
 import { SolverHomePage } from "/frontend/components/SolverHomePage/SolverHomePage.js";
+import { SolverVariablesPage } from "/frontend/components/SolverVariablesPage/SolverVariablesPage.js";
 
 window.app = {};
+const app = window.app;
 app.router = Router;
 
 window.addEventListener("DOMContentLoaded", () => {

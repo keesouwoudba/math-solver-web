@@ -75,6 +75,44 @@
         </div>
     </template>
 
+
+    <template id="solver-variables-template">
+        <section class="variables-page" aria-label="Variable selection">
+            <div class="variables-card">
+                <div class="formula-display" id="current-formula">
+                    <span class="formula-label">CURRENT FORMULA</span>
+                    <div class="formula-value" id="formula-value"></div>
+                </div>
+                <div class="variables-section">
+                    <h1 class="variables-title">Choose Variable to Solve For</h1>
+                    <p class="variables-subtitle">
+                        Select the variable you want to isolate. The engine will rearrange the equation accordingly.
+                    </p>
+                    <fieldset class="variables-grid" id="variables-group">
+                        <legend class="sr-only">Variables</legend>
+                        <!-- variables to be inserted here -->
+                    </fieldset>
+                </div>
+                <div class="actions-row">
+                    <button class="btn-back" id="btn-back" type="button">
+                        <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+                        Back
+                    </button>
+                    <button class="btn-solve" id="btn-solve" type="button">
+                        Solve
+                        <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+    </template>
+    <template id="variable-option-template">
+        <label class="variable-option">
+            <input class="variable-input" type="radio" name="variable" id="" value="">
+            <span class="variable-symbol"></span>
+        </label>
+    </template>
+
     <footer
         class="bg-slate-50 dark:bg-slate-900 full-width border-t border-slate-200 dark:border-slate-800 flat no shadows font-['Space_Grotesk'] w-full py-3 px-4 sm:py-4 sm:px-5 md:py-6 md:px-6 lg:py-8 mt-auto flex flex-col md:flex-row justify-between items-center gap-2 sm:gap-3 md:gap-4 lg:gap-6">
         <div class="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300">© 2026 MathSolver. All rights

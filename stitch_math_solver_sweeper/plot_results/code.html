@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MathSolver - Plot Results</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600&amp;family=Newsreader:wght@400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "primary-fixed": "#d4e3ff",
+                      "inverse-surface": "#2d3133",
+                      "on-tertiary-container": "#7ba7ff",
+                      "tertiary-fixed-dim": "#adc6ff",
+                      "surface": "#f7f9fb",
+                      "tertiary-fixed": "#d8e2ff",
+                      "secondary-fixed": "#6ffbbe",
+                      "on-primary": "#ffffff",
+                      "on-tertiary": "#ffffff",
+                      "primary": "#0f2846",
+                      "surface-container-low": "#f2f4f6",
+                      "inverse-on-surface": "#eff1f3",
+                      "surface-dim": "#d8dadc",
+                      "on-tertiary-fixed-variant": "#004395",
+                      "surface-container-highest": "#e0e3e5",
+                      "tertiary": "#002558",
+                      "surface-bright": "#f7f9fb",
+                      "background": "#f7f9fb",
+                      "primary-fixed-dim": "#b1c8ee",
+                      "on-primary-container": "#92a9ce",
+                      "inverse-primary": "#b1c8ee",
+                      "on-secondary-container": "#00714d",
+                      "error-container": "#ffdad6",
+                      "on-surface": "#191c1e",
+                      "on-surface-variant": "#44474e",
+                      "primary-container": "#273e5d",
+                      "error": "#ba1a1a",
+                      "on-error-container": "#93000a",
+                      "outline": "#74777e",
+                      "tertiary-container": "#003a82",
+                      "secondary-fixed-dim": "#4edea3",
+                      "on-primary-fixed": "#001c39",
+                      "on-secondary": "#ffffff",
+                      "on-secondary-fixed-variant": "#005236",
+                      "surface-tint": "#495f80",
+                      "surface-container-high": "#e6e8ea",
+                      "on-background": "#191c1e",
+                      "secondary": "#006c49",
+                      "on-error": "#ffffff",
+                      "on-secondary-fixed": "#002113",
+                      "surface-container": "#eceef0",
+                      "surface-container-lowest": "#ffffff",
+                      "on-primary-fixed-variant": "#314867",
+                      "outline-variant": "#c4c6ce",
+                      "on-tertiary-fixed": "#001a42",
+                      "secondary-container": "#6cf8bb",
+                      "surface-variant": "#e0e3e5"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "md": "1rem",
+                      "lg": "1.5rem",
+                      "xl": "2.5rem",
+                      "sm": "0.5rem",
+                      "base": "4px",
+                      "xs": "0.25rem",
+                      "container-margin": "clamp(1rem, 5vw, 2.5rem)",
+                      "grid-gutter": "1rem"
+              },
+              "fontFamily": {
+                      "keypad-label": [
+                              "Inter"
+                      ],
+                      "label-caps": [
+                              "Inter"
+                      ],
+                      "h2-ui": [
+                              "Space Grotesk"
+                      ],
+                      "h1-ui": [
+                              "Space Grotesk"
+                      ],
+                      "math-inline": [
+                              "Newsreader"
+                      ],
+                      "body-main": [
+                              "Inter"
+                      ],
+                      "display-math": [
+                              "Newsreader"
+                      ]
+              },
+              "fontSize": {
+                      "keypad-label": [
+                              "1.25rem",
+                              {
+                                      "lineHeight": "1",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "label-caps": [
+                              "0.75rem",
+                              {
+                                      "lineHeight": "1",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "h2-ui": [
+                              "1.5rem",
+                              {
+                                      "lineHeight": "1.3",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "h1-ui": [
+                              "2rem",
+                              {
+                                      "lineHeight": "1.3",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "math-inline": [
+                              "1.125rem",
+                              {
+                                      "lineHeight": "1.5",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "body-main": [
+                              "1rem",
+                              {
+                                      "lineHeight": "1.5",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "display-math": [
+                              "2.5rem",
+                              {
+                                      "lineHeight": "1.2",
+                                      "fontWeight": "400"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-main text-body-main min-h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="bg-slate-50 dark:bg-slate-900 font-['Space_Grotesk'] tracking-tight docked full-width top-0 border-b border-slate-200 dark:border-slate-800 flat no shadows flex justify-between items-center w-full px-6 py-4 max-w-7xl mx-auto z-50">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" data-icon="function" data-weight="fill" style="font-variation-settings: 'FILL' 1;">function</span>
+<h1 class="text-xl font-bold text-slate-900 dark:text-white">MathSolver</h1>
+</div>
+<button class="text-slate-800 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors px-4 py-2 rounded-lg font-medium flex items-center gap-2 opacity-80 transition-all">
+            Help
+        </button>
+</header>
+<div class="flex flex-1 overflow-hidden">
+<!-- NavigationDrawer -->
+<nav class="hidden md:flex flex-col fixed left-0 top-0 h-screen z-40 bg-white dark:bg-slate-950 font-['Space_Grotesk'] font-medium h-full w-64 border-r border-slate-200 dark:border-slate-800 shadow-xl dark:shadow-none pt-24 pb-8 px-4 gap-2">
+<h2 class="text-lg font-bold text-slate-900 dark:text-white mb-6 px-4">Menu</h2>
+<a class="bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-lg flex items-center gap-3 px-4 py-3 scale-95 duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="calculate">calculate</span>
+                Solver
+            </a>
+<a class="text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900 flex items-center gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-slate-100 dark:hover:bg-slate-800" href="#">
+<span class="material-symbols-outlined" data-icon="cleaning_services">cleaning_services</span>
+                Sweeper
+            </a>
+</nav>
+<!-- Main Content Canvas -->
+<main class="flex-1 md:ml-64 p-container-margin overflow-y-auto">
+<div class="max-w-5xl mx-auto flex flex-col gap-xl">
+<!-- Header Section -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-md border-b border-outline-variant pb-md">
+<div>
+<span class="font-label-caps text-label-caps text-outline uppercase tracking-wider mb-sm block">Visualization</span>
+<h2 class="font-h1-ui text-h1-ui text-on-surface">Target (S) vs Sweeper (t)</h2>
+</div>
+<div class="flex gap-sm">
+<button class="bg-surface-container-high text-on-surface hover:bg-surface-variant px-4 py-2 rounded-DEFAULT font-medium transition-colors flex items-center gap-2 border border-outline-variant">
+<span class="material-symbols-outlined" data-icon="tune">tune</span>
+                            Adjust Configuration
+                        </button>
+</div>
+</div>
+<!-- Plot Area (Full Width on Mobile) -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden -mx-container-margin md:mx-0 p-1 md:p-xl flex flex-col items-center justify-center min-h-[400px] md:min-h-[600px] relative">
+<!-- Placeholder for the actual PNG plot -->
+<div class="w-full h-full min-h-[350px] md:min-h-[550px] bg-surface-container-low border border-dashed border-outline-variant rounded-lg flex items-center justify-center relative overflow-hidden group">
+<!-- Simulated Plot Image -->
+<img alt="Data visualization graph showing a curve" class="w-full h-full object-contain absolute inset-0 opacity-80 mix-blend-multiply" data-alt="Scientific data visualization plot showing a smooth curved line graph with blue and green gradients on a stark white background with minimal grid lines" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAluP6V_toPhjguUER4uaNwa63mcGhUYgk6IlT_QtjZ7ipYOnM6z5l8LPyw6JRy1WICqDtZDtd-qo40_NY_bGHX3IG6oZKXxOI7g-GGG02yiYHs0teeH8lhaXI_-BBIV8i3GgadCPF-BCteIRVvKN8tIF1CmWeNgoz_w55vaNoB5TXdaUFdRp9aeMHLAtSc4qr6MfGpJuwk1f5vu71DZiJRAzWjoR6eSEoR4iUIkaMgWYl2fdmGxRnRWSMKPrB8cmIIv-iMUJw4b4sO"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest via-transparent to-transparent opacity-50"></div>
+</div>
+<!-- Plot Details Overlay / Caption -->
+<div class="mt-md w-full flex justify-between items-center px-4 md:px-0 text-sm text-on-surface-variant">
+<div>
+<span class="font-math-inline text-math-inline italic">f(t) = S(t)</span>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2">
+<div class="w-3 h-3 bg-primary rounded-full"></div>
+<span>Target Line</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-3 h-3 bg-secondary rounded-full"></div>
+<span>Sweeper Value</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Action Bar -->
+<div class="flex flex-col sm:flex-row justify-between items-center gap-md bg-surface-container p-lg rounded-xl border border-outline-variant">
+<div class="flex-1 flex flex-col sm:flex-row gap-md w-full">
+<button class="bg-primary text-on-primary hover:bg-primary-container hover:text-on-primary-container px-6 py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 flex-1 sm:flex-none">
+<span class="material-symbols-outlined" data-icon="download">download</span>
+                            Download PNG
+                        </button>
+<button class="bg-surface-container-lowest text-primary border border-primary hover:bg-primary-fixed-dim px-6 py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 flex-1 sm:flex-none">
+<span class="material-symbols-outlined" data-icon="file_copy">file_copy</span>
+                            Copy Data
+                        </button>
+</div>
+<button class="bg-secondary text-on-secondary hover:bg-on-secondary-container hover:text-secondary-fixed px-6 py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 w-full sm:w-auto shadow-sm">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+                        New Solver Session
+                    </button>
+</div>
+<!-- Equation Details Card -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg mt-md">
+<h3 class="font-h2-ui text-h2-ui text-on-surface mb-md">Computed Parameters</h3>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-md">
+<div class="p-md bg-surface-container-low rounded-lg border border-surface-variant flex flex-col gap-xs">
+<span class="font-label-caps text-label-caps text-outline uppercase">Max Variance</span>
+<span class="font-math-inline text-math-inline text-primary text-xl">0.0042</span>
+</div>
+<div class="p-md bg-surface-container-low rounded-lg border border-surface-variant flex flex-col gap-xs">
+<span class="font-label-caps text-label-caps text-outline uppercase">Sweeper Integral</span>
+<span class="font-math-inline text-math-inline text-primary text-xl">∫ S(t) dt = 42.8</span>
+</div>
+<div class="p-md bg-surface-container-low rounded-lg border border-surface-variant flex flex-col gap-xs">
+<span class="font-label-caps text-label-caps text-outline uppercase">Convergence Rate</span>
+<span class="font-math-inline text-math-inline text-primary text-xl">98.2%</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- Footer -->
+<footer class="bg-slate-50 dark:bg-slate-900 w-full py-8 px-6 mt-auto flex flex-col md:flex-row justify-between items-center gap-4 border-t border-slate-200 dark:border-slate-800 flat no shadows md:ml-64 z-10 relative">
+<p class="font-['Space_Grotesk'] text-sm text-slate-500 dark:text-slate-400">© 2024 MathSolver. Clinical Precision.</p>
+<div class="flex gap-6">
+<a class="font-['Space_Grotesk'] text-sm text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 underline transition-all cursor-pointer" href="#">Documentation</a>
+<a class="font-['Space_Grotesk'] text-sm text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 underline transition-all cursor-pointer" href="#">Privacy</a>
+<a class="font-['Space_Grotesk'] text-sm text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 underline transition-all cursor-pointer" href="#">Terms</a>
+<a class="font-['Space_Grotesk'] text-sm text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 underline transition-all cursor-pointer" href="#">API</a>
+</div>
+</footer>
+</body></html>

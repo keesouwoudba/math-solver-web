@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Solution View - MathSolver</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Newsreader:wght@400&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-fixed": "#d4e3ff",
+                        "inverse-surface": "#2d3133",
+                        "on-tertiary-container": "#7ba7ff",
+                        "tertiary-fixed-dim": "#adc6ff",
+                        "surface": "#f7f9fb",
+                        "tertiary-fixed": "#d8e2ff",
+                        "secondary-fixed": "#6ffbbe",
+                        "on-primary": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "primary": "#0f2846",
+                        "surface-container-low": "#f2f4f6",
+                        "inverse-on-surface": "#eff1f3",
+                        "surface-dim": "#d8dadc",
+                        "on-tertiary-fixed-variant": "#004395",
+                        "surface-container-highest": "#e0e3e5",
+                        "tertiary": "#002558",
+                        "surface-bright": "#f7f9fb",
+                        "background": "#f7f9fb",
+                        "primary-fixed-dim": "#b1c8ee",
+                        "on-primary-container": "#92a9ce",
+                        "inverse-primary": "#b1c8ee",
+                        "on-secondary-container": "#00714d",
+                        "error-container": "#ffdad6",
+                        "on-surface": "#191c1e",
+                        "on-surface-variant": "#44474e",
+                        "primary-container": "#273e5d",
+                        "error": "#ba1a1a",
+                        "on-error-container": "#93000a",
+                        "outline": "#74777e",
+                        "tertiary-container": "#003a82",
+                        "secondary-fixed-dim": "#4edea3",
+                        "on-primary-fixed": "#001c39",
+                        "on-secondary": "#ffffff",
+                        "on-secondary-fixed-variant": "#005236",
+                        "surface-tint": "#495f80",
+                        "surface-container-high": "#e6e8ea",
+                        "on-background": "#191c1e",
+                        "secondary": "#006c49",
+                        "on-error": "#ffffff",
+                        "on-secondary-fixed": "#002113",
+                        "surface-container": "#eceef0",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-fixed-variant": "#314867",
+                        "outline-variant": "#c4c6ce",
+                        "on-tertiary-fixed": "#001a42",
+                        "secondary-container": "#6cf8bb",
+                        "surface-variant": "#e0e3e5"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "md": "1rem",
+                        "lg": "1.5rem",
+                        "xl": "2.5rem",
+                        "sm": "0.5rem",
+                        "base": "4px",
+                        "xs": "0.25rem",
+                        "container-margin": "clamp(1rem, 5vw, 2.5rem)",
+                        "grid-gutter": "1rem"
+                    },
+                    "fontFamily": {
+                        "keypad-label": ["Inter"],
+                        "label-caps": ["Inter"],
+                        "h2-ui": ["Space Grotesk"],
+                        "h1-ui": ["Space Grotesk"],
+                        "math-inline": ["Newsreader"],
+                        "body-main": ["Inter"],
+                        "display-math": ["Newsreader"]
+                    },
+                    "fontSize": {
+                        "keypad-label": ["1.25rem", {"lineHeight": "1", "fontWeight": "500"}],
+                        "label-caps": ["0.75rem", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                        "h2-ui": ["1.5rem", {"lineHeight": "1.3", "fontWeight": "500"}],
+                        "h1-ui": ["2rem", {"lineHeight": "1.3", "fontWeight": "600"}],
+                        "math-inline": ["1.125rem", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "body-main": ["1rem", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "display-math": ["2.5rem", {"lineHeight": "1.2", "fontWeight": "400"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen flex flex-col font-body-main text-body-main">
+<!-- TopAppBar -->
+<header class="bg-slate-50 dark:bg-slate-900 font-['Space_Grotesk'] tracking-tight docked full-width top-0 border-b border-slate-200 dark:border-slate-800 flat no shadows flex justify-between items-center w-full px-6 py-4 max-w-7xl mx-auto z-50">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-slate-800 dark:text-slate-100" style="font-variation-settings: 'FILL' 1;">function</span>
+<span class="text-xl font-bold text-slate-900 dark:text-white">MathSolver</span>
+</div>
+<button class="text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors px-4 py-2 rounded-lg font-medium">Help</button>
+</header>
+<div class="flex flex-1 overflow-hidden">
+<!-- NavigationDrawer -->
+<nav class="bg-white dark:bg-slate-950 font-['Space_Grotesk'] font-medium h-full w-64 border-r border-slate-200 dark:border-slate-800 shadow-xl dark:shadow-none hidden md:flex flex-col fixed left-0 top-0 h-screen z-40 pt-20">
+<div class="px-6 py-4">
+<h2 class="text-sm text-slate-500 dark:text-slate-400 font-bold mb-4 uppercase tracking-wider">Menu</h2>
+<ul class="space-y-2">
+<li>
+<a class="bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-lg flex items-center gap-3 px-4 py-3 Active: scale-95 duration-150" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">calculate</span>
+                            Solver
+                        </a>
+</li>
+<li>
+<a class="text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-3 px-4 py-3 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">cleaning_services</span>
+                            Sweeper
+                        </a>
+</li>
+</ul>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-1 w-full max-w-4xl mx-auto px-container-margin py-xl md:ml-64 overflow-y-auto">
+<div class="flex flex-col gap-lg">
+<!-- Header / Breadcrumb -->
+<div class="flex items-center gap-2 text-on-surface-variant mb-4">
+<span class="material-symbols-outlined text-sm">arrow_back</span>
+<span class="font-label-caps text-label-caps uppercase tracking-wider">Back to Input</span>
+</div>
+<h1 class="font-h1-ui text-h1-ui text-on-surface mb-2">Calculation Result</h1>
+<!-- Original Formula Card -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-xl flex flex-col gap-md">
+<span class="font-label-caps text-label-caps text-on-surface-variant">ORIGINAL EQUATION</span>
+<div class="flex justify-between items-center">
+<div class="font-display-math text-display-math text-on-surface">
+                            S = \int v \cdot dt
+                        </div>
+<button class="text-on-surface-variant hover:text-primary transition-colors flex items-center gap-1" title="Copy LaTeX">
+<span class="material-symbols-outlined text-[20px]">content_copy</span>
+</button>
+</div>
+</div>
+<!-- Solution Card -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-xl flex flex-col gap-md shadow-[0px_4px_20px_rgba(15,23,42,0.05)] relative overflow-hidden">
+<div class="absolute top-0 left-0 w-1 h-full bg-secondary"></div>
+<span class="font-label-caps text-label-caps text-secondary font-semibold">FINAL SOLUTION</span>
+<div class="font-display-math text-display-math text-on-surface py-lg">
+                        S = v \cdot t + C
+                    </div>
+<div class="bg-surface p-md rounded-lg border border-surface-variant text-sm mt-4">
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-on-surface-variant text-[20px] mt-0.5">info</span>
+<p class="text-on-surface-variant">Assuming constant velocity <span class="font-math-inline text-math-inline">v</span>. <span class="font-math-inline text-math-inline">C</span> represents the constant of integration (initial position).</p>
+</div>
+</div>
+</div>
+<!-- Action Section (Bento style) -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-grid-gutter mt-lg">
+<!-- Sweeper Promo Box -->
+<div class="bg-primary-container text-on-primary-container rounded-xl p-lg flex flex-col justify-between border border-primary/20">
+<div>
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined text-secondary-fixed">timeline</span>
+<h3 class="font-h2-ui text-h2-ui text-on-primary">Analyze Further</h3>
+</div>
+<p class="text-primary-fixed-dim mb-6">Want to analyze further? Sweep this equation across a range of variables to generate a data table or plot.</p>
+</div>
+<button class="bg-secondary text-on-secondary hover:bg-secondary/90 transition-colors py-3 px-4 rounded-lg font-medium flex items-center justify-center gap-2 w-full active:scale-[0.98]">
+<span class="material-symbols-outlined text-[20px]">cleaning_services</span>
+                            Sweep/Plot This Equation
+                        </button>
+</div>
+<!-- Secondary Actions -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg flex flex-col justify-center gap-md">
+<button class="border border-outline text-on-surface hover:bg-surface transition-colors py-3 px-4 rounded-lg font-medium flex items-center justify-center gap-2 w-full">
+<span class="material-symbols-outlined text-[20px]">add</span>
+                            Start New Calculation
+                        </button>
+<button class="border border-transparent text-on-surface-variant hover:bg-surface-variant/50 transition-colors py-3 px-4 rounded-lg font-medium flex items-center justify-center gap-2 w-full">
+<span class="material-symbols-outlined text-[20px]">save</span>
+                            Save Result
+                        </button>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- Footer -->
+<footer class="bg-slate-50 dark:bg-slate-900 font-['Space_Grotesk'] text-sm full-width border-t border-slate-200 dark:border-slate-800 flat no shadows w-full py-8 px-6 mt-auto flex flex-col md:flex-row justify-between items-center gap-4 z-50 relative">
+<div class="text-sm font-semibold text-slate-700 dark:text-slate-300">
+            © 2024 MathSolver. Clinical Precision.
+        </div>
+<div class="flex gap-6">
+<a class="text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 underline transition-all cursor-pointer" href="#">Documentation</a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 underline transition-all cursor-pointer" href="#">Privacy</a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 underline transition-all cursor-pointer" href="#">Terms</a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 underline transition-all cursor-pointer" href="#">API</a>
+</div>
+</footer>
+</body></html>
