@@ -1,26 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MathSolver</title>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Newsreader:wght@400&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Newsreader:wght@400&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
 
     <script src="app.js" defer type="module"></script>
     <link href="./dist/output.css" rel="stylesheet">
 
 </head>
+
 <body class="min-h-screen flex flex-col">
-    <header class="bg-slate-50 dark:bg-slate-900 docked full-width top-0 border-b border-slate-200 dark:border-slate-800 flat no shadows font-['Space_Grotesk'] tracking-tight">
+    <header
+        class="bg-slate-50 dark:bg-slate-900 docked full-width top-0 border-b border-slate-200 dark:border-slate-800 flat no shadows font-['Space_Grotesk'] tracking-tight">
         <div class="flex justify-between items-center w-full px-6 py-4 max-w-9xl mx-auto">
             <div class="flex items-center gap-2">
-                <span aria-hidden="true" class="material-symbols-outlined text-slate-800 dark:text-slate-100" data-icon="function">function</span>
+                <span aria-hidden="true" class="material-symbols-outlined text-slate-800 dark:text-slate-100"
+                    data-icon="function">function</span>
                 <span class="text-xl font-bold text-slate-900 dark:text-white">MathSolver</span>
             </div>
             <div>
-                <a class="navlink text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 underline transition-all cursor-pointer" href="#help">Help</a>
+                <a class="navlink text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 underline transition-all cursor-pointer"
+                    href="#help">Help</a>
             </div>
         </div>
     </header>
@@ -44,20 +55,41 @@
                 </p>
                 <p class="solver-cta">
                     <span class="solver-cta-label">Launch Solver</span>
-                    <span class="material-symbols-outlined solver-cta-icon" data-icon="arrow_forward" aria-hidden="true">arrow_forward</span>
+                    <span class="material-symbols-outlined solver-cta-icon" data-icon="arrow_forward"
+                        aria-hidden="true">arrow_forward</span>
                 </p>
             </a>
         </section>
     </template>
+    <template id="ui-popup-template">
+        <div class="modal-overlay" id="modalOverlay" aria-hidden="true">
+            <div class="window" role="alertdialog" aria-modal="true" aria-labelledby="title"
+                aria-describedby="your-message">
+                <div class="icon"></div>
+                <h2 id="title"></h2>
+                <div id="your-message">
+                    hello
+                </div>
+                <button class="close-btn" id="closeError">OK</button>
+            </div>
+        </div>
+    </template>
 
-    <footer class="bg-slate-50 dark:bg-slate-900 full-width border-t border-slate-200 dark:border-slate-800 flat no shadows font-['Space_Grotesk'] w-full py-3 px-4 sm:py-4 sm:px-5 md:py-6 md:px-6 lg:py-8 mt-auto flex flex-col md:flex-row justify-between items-center gap-2 sm:gap-3 md:gap-4 lg:gap-6">
-        <div class="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300">© 2026 MathSolver. All rights reserved.</div>
+    <footer
+        class="bg-slate-50 dark:bg-slate-900 full-width border-t border-slate-200 dark:border-slate-800 flat no shadows font-['Space_Grotesk'] w-full py-3 px-4 sm:py-4 sm:px-5 md:py-6 md:px-6 lg:py-8 mt-auto flex flex-col md:flex-row justify-between items-center gap-2 sm:gap-3 md:gap-4 lg:gap-6">
+        <div class="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300">© 2026 MathSolver. All rights
+            reserved.</div>
         <nav class="flex flex-wrap justify-center gap-2 sm:gap-3 md:gap-4 lg:gap-6 text-xs sm:text-sm">
-            <a class="navlink text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 underline transition-all cursor-pointer" href="/docs">Documentation</a>
-            <a class="navlink text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 underline transition-all cursor-pointer" href="/terms">Terms</a>
-            <a class="navlink text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 underline transition-all cursor-pointer" href="/contacts">Contacts</a>
-            <a class="navlink text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 underline transition-all cursor-pointer" href="/bug">Report a Bug</a>
+            <a class="navlink text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 underline transition-all cursor-pointer"
+                href="/docs">Documentation</a>
+            <a class="navlink text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 underline transition-all cursor-pointer"
+                href="/terms">Terms</a>
+            <a class="navlink text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 underline transition-all cursor-pointer"
+                href="/contacts">Contacts</a>
+            <a class="navlink text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 underline transition-all cursor-pointer"
+                href="/bug">Report a Bug</a>
         </nav>
     </footer>
 </body>
+
 </html>

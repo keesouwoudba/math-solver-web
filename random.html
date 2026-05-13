@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beautiful Error Popup</title>
+    <style>
+        /* General Page Styling */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f2f5;
+        }
+
+        /* The Main Trigger Button */
+        .trigger-btn {
+            padding: 12px 24px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #ff4757;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            transition: background 0.3s;
+        }
+
+        .trigger-btn:hover {
+            background-color: #ff6b81;
+        }
+
+        /* The Modal Overlay (Hidden by default) */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            /* Dimmed background */
+            display: none;
+            /* Hidden */
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        /* The Error Window Card */
+        .error-window {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .error-icon {
+            font-size: 50px;
+            color: #ff4757;
+            margin-bottom: 10px;
+        }
+
+        .error-window h2 {
+            margin: 0 0 10px;
+            color: #2f3542;
+        }
+
+        .error-window p,
+        .error-window #your-error {
+            color: #747d8c;
+            margin-bottom: 20px;
+        }
+
+        /* The OK Button */
+        .close-btn {
+            background-color: #2f3542;
+            color: white;
+            border: none;
+            padding: 10px 30px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .close-btn:hover {
+            background-color: #57606f;
+        }
+
+        /* Simple animation for the popup */
+        @keyframes fadeIn {
+            from {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Main Button -->
+    <button class="trigger-btn" id="showError">Show Error Message</button>
+
+    <!-- Modal Structure -->
+    <div class="modal-overlay" id="modalOverlay" aria-hidden="true">
+        <div class="error-window" role="alertdialog" aria-modal="true" aria-labelledby="error-title"
+            aria-describedby="your-error">
+            <div class="error-icon">⚠️</div>
+            <h2 id="error-title">Oops!</h2>
+            <div id="your-error">
+                hello
+            </div>
+            <button class="close-btn" id="closeError">OK</button>
+        </div>
+    </div>
+
+    <script>
+        // Get elements from the DOM
+        const openBtn = document.getElementById('showError');
+        const closeBtn = document.getElementById('closeError');
+        const overlay = document.getElementById('modalOverlay');
+        const focusableSelector = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+        let lastActive = null;
+
+        const getFocusable = () => Array.from(
+            overlay.querySelectorAll(focusableSelector)
+        ).filter((el) => !el.hasAttribute('disabled') && el.offsetParent !== null);
+
+        const showModal = () => {
+            lastActive = document.activeElement;
+            overlay.classList.add('active');
+            overlay.setAttribute('aria-hidden', 'false');
+            const focusables = getFocusable();
+            (focusables[0] || closeBtn).focus();
+        };
+
+        const hideModal = () => {
+            overlay.classList.remove('active');
+            overlay.setAttribute('aria-hidden', 'true');
+            if (lastActive && typeof lastActive.focus === 'function') {
+                lastActive.focus();
+            }
+        };
+
+        // Function to show the modal
+        openBtn.addEventListener('click', () => {
+            showModal();
+        });
+
+        // Function to hide the modal
+        closeBtn.addEventListener('click', () => {
+            hideModal();
+        });
+
+        // Bonus: Close modal if user clicks the dark overlay area
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                hideModal();
+            }
+        });
+
+        // ESC to close + focus trap
+        document.addEventListener('keydown', (e) => {
+            if (!overlay.classList.contains('active')) {
+                return;
+            }
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                hideModal();
+                return;
+            }
+            if (e.key !== 'Tab') {
+                return;
+            }
+            const focusables = getFocusable();
+            if (!focusables.length) {
+                e.preventDefault();
+                return;
+            }
+            const first = focusables[0];
+            const last = focusables[focusables.length - 1];
+            const active = document.activeElement;
+
+            if (e.shiftKey) {
+                if (active === first || !overlay.contains(active)) {
+                    e.preventDefault();
+                    last.focus();
+                }
+            } else {
+                if (active === last) {
+                    e.preventDefault();
+                    first.focus();
+                }
+            }
+        });
+    </script>
+
+</body>
+
+</html>

@@ -617,34 +617,41 @@ class FormulaSolver:
     # ========== PRIVATE METHODS ==========
 
     def _validate_syntax(self, formula_string: str) -> bool:
-        if not formula_string:
+        trimmed_formula = (formula_string or "").strip()
+        if not trimmed_formula:
             self.error_message = "formula_string is required"
             return False
 
-        pattern = r"[^=]+=[^=]+"
-        pattern_digit_followed_by_term = r"(\d)([a-zA-Z_]|\()"
-        pattern_paren_followed_by_term = r"([)])(\d|[a-zA-Z_]|\()"
-
-        if not re.fullmatch(pattern, formula_string):
-            self.error_message = "the string provided is inappropriate: it does not contain one '='"
+        equals_matches = re.findall(r"=", trimmed_formula)
+        if len(equals_matches) != 1:
+            self.error_message = "the string must contain exactly one '='"
             return False
 
+        lhs, rhs = trimmed_formula.split("=")
+        if not lhs.strip() or not rhs.strip():
+            self.error_message = "both sides of '=' must be non-empty"
+            return False
+
+        pattern_digit_followed_by_term = r"(\d)([a-zA-Z_]|\()"
+        pattern_paren_followed_by_term = r"([)])(\d|[a-zA-Z_]|\()"
+        working_formula = trimmed_formula
+
         if (
-            re.search(pattern_digit_followed_by_term, formula_string) or
-            re.search(pattern_paren_followed_by_term, formula_string)
+            re.search(pattern_digit_followed_by_term, working_formula) or
+            re.search(pattern_paren_followed_by_term, working_formula)
         ):
             self.error_message = "the string contains implied multiplication like 3a, 3(a+b): please use explicit (e.g. 3*a)"
             return False
 
         pattern_word_paren = r"\b([a-zA-Z_][a-zA-Z0-9_]*)\("
-        func_matches = re.findall(pattern_word_paren, formula_string)
+        func_matches = re.findall(pattern_word_paren, working_formula)
 
         for match in func_matches:
             if match not in RESERVED_FUNCTIONS:
                 self.error_message = f"the string contains implied multiplication like {match}(something): please use explicit (e.g. {match}*(something))"
                 return False
 
-        if len(self._parse_variables(formula_string)) < 1:
+        if len(self._parse_variables(working_formula)) < 1:
             self.error_message = "the formula must have at least 1 variable"
             return False
 
@@ -656,6 +663,10 @@ class FormulaSolver:
         unique_words = set(unfiltered_words)
         variables_list = sorted(list(unique_words - RESERVED_FUNCTIONS))
         return variables_list
+
+
+
+
 
     def _symbolize_variables(self, variables_list: list[str]) -> dict:
         symbols_dict = {var: sp.symbols(var) for var in variables_list}
