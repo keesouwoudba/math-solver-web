@@ -8,6 +8,12 @@ Python backend and a lightweight frontend.
 
 ------------------------------------------------------------------------
 
+⚠️ **PROJECT STATUS: IN PROGRESS**
+
+This project is currently under active development. Features and functionality may change.
+
+------------------------------------------------------------------------
+
 🚀 Features / Возможности
 
 -   Solve math expressions
