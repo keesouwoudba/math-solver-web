@@ -1,17 +1,32 @@
 import VDOMService from "../../services/vDOMService.js";
 import PopupService from "../../services/PopupService.js";
+import ScreenContextService from "../../services/ScreenContextService.js";
 import API from "../../services/API.js";
 import Router from "../../services/Router.js";
 import UiPopup from "../UiPopup/UiPopup.js";
 
+//what is prevVdom and Vdom? vDom is just almost the same object as dynamicVDOM, prevDOM is stringified copy taken when snapshoot is done
+//how the obects are saved. i need to inspect that.
+//on disconnected callback should i save those as well? and then in connected callback again check if there was a state to load
+
+//tocreate:
+//for calling api on solve, first check if fomula is the same and jsondata has that data. dont even call api if already there is jsonSolverHomePageData
 export class SolverHomePage extends HTMLElement {
+  app = window.app || {};
+
+  //services
+  screenContextService = ScreenContextService.getInstance(); //object starts with lowercase
   MyVDOMService;
   MyPopupService;
-  prevDOM;
-  elems;
+
+  //data
   data;
-  vDOM;
   jsonDataSolverHomePage;
+
+  //dom and state references
+  prevDOM;
+  vDOM;
+  elems;
   inputStateRef = {
     current: "",
     selectionStart: 0,
@@ -210,14 +225,19 @@ export class SolverHomePage extends HTMLElement {
   constructor() {
     super();
     this.root = this.attachShadow({ mode: "open" });
+    this.loadCSS();
+    this.activateData();
+  }
+
+  loadCSS() {
+    console.log(`SolverHomePage: Loading CSS for SolverHomePage`);
     const styles = document.createElement("style");
+    styles.textContent = `@import "/frontend/components/SolverHomePage/SolverHomePage.css";`;
     this.root.appendChild(styles);
-    const loadCSS = () => {
-      console.log(`SolverHomePage: Loading CSS for SolverHomePage`);
-      styles.textContent = `@import "/frontend/components/SolverHomePage/SolverHomePage.css";`;
-      console.log(`SolverHomePage: CSS loaded for SolverHomePage`);
-    };
-    const activateVDOM = () => {
+    console.log(`SolverHomePage: CSS loaded for SolverHomePage`);
+  }
+  activateData() {
+    if (!this.data && !ScreenContextService.getInstance().SolverHomePageData) {
       this.vDOM = VDOMService.createVDOM(this.dynamicVDOM);
       this.data = {
         vDOM: this.vDOM,
@@ -232,14 +252,20 @@ export class SolverHomePage extends HTMLElement {
           message: "",
         },
         jsonDataSolverHomePage: this.jsonDataSolverHomePage,
+        MyVDOMService: this.MyVDOMService,
+        MyPopupService: this.MyPopupService,
       };
       this.MyVDOMService = new VDOMService(this.root, this.data);
       this.MyPopupService = new PopupService(this.root, this.data);
-      window.app.SolverHomePageData = this.data;
-    };
-
-    loadCSS();
-    activateVDOM();
+      this.screenContextService.setSolverHomePageData(
+        this.data,
+        this.jsonDataSolverHomePage,
+      );
+      console.log(`SolverHomePage: VDOM activated and services initialized`);
+    } else {
+      //recreate state from screen context service
+      this.recreateStateFromScreenContext();
+    }
   }
 
   //once element is on the page
@@ -247,6 +273,34 @@ export class SolverHomePage extends HTMLElement {
     console.log("SolverHomePage: connectedCallback called");
     this.MyVDOMService.updateDOM();
     this.attachEventListeners();
+  }
+
+  updateScreenContext() {
+    this.screenContextService.setSolverHomePageData(
+      this.data,
+      this.jsonDataSolverHomePage,
+    );
+    console.log(
+      `SolverHomePage: Screen context updated with current data and JSON`,
+    );
+  }
+  recreateStateFromScreenContext() {
+    const solverHomePageContext =
+      this.screenContextService.getSolverHomePageData();
+    this.data = solverHomePageContext.data;
+    this.inputStateRef = this.data.inputStateRef;
+    this.vDOM = this.data.vDOM;
+    this.prevDOM = this.data.prevDOM;
+    this.elems = undefined; //to be recreated by VDOMService
+    this.data.elems = this.elems; //debug mode. TODO: later clean up and remove elems from data and use only this.elems
+    this.dynamicVDOM = this.data.dynamicVDOM; //just in case
+    this.jsonDataSolverHomePage = solverHomePageContext.json;
+    this.MyVDOMService = new VDOMService(this.root, this.data);
+    this.MyPopupService = new PopupService(this.root, this.data);
+
+    console.log(
+      `SolverHomePage: State recreated from screen context with data and JSON`,
+    );
   }
 
   attachEventListeners() {
@@ -306,7 +360,7 @@ export class SolverHomePage extends HTMLElement {
         return;
       }
 
-      this.MyVDOMService.takeSnapshot(); //i could have done a proxy that automatically takes snapshot before value change, but this is fine for now, i will refactor later ;)
+      this.MyVDOMService.takeSnapshot();
       this.inputStateRef.current = target.value;
       this.inputStateRef.selectionStart = target.selectionStart;
       this.inputStateRef.selectionEnd = target.selectionEnd;
@@ -332,6 +386,7 @@ export class SolverHomePage extends HTMLElement {
 
         console.log(`SolverHomePage: Clear button clicked, user input cleared`);
         this.MyVDOMService.updateDOM("from clear button click");
+        this.updateScreenContext();
       });
     }
 
@@ -465,6 +520,7 @@ export class SolverHomePage extends HTMLElement {
         this.MyVDOMService.updateDOM(
           `from operator/function button click, id: ${id}`,
         );
+        this.updateScreenContext();
       });
     });
 
@@ -497,9 +553,11 @@ export class SolverHomePage extends HTMLElement {
               jsonDataSolverHomePage;
 
             if (status_bool && valid) {
+              this.updateScreenContext();
               Router.go("/solver/variables");
             } else {
               //step 3
+              this.updateScreenContext();
               this.MyPopupService.showErrorPopup(
                 `Validation failed: ${error || "unknown error"}, formula string: ${formula_string || "not provided"}, variables parsed: ${variables ? variables.join(", ") : "not provided"}`,
               );
@@ -507,6 +565,7 @@ export class SolverHomePage extends HTMLElement {
           }
         } else {
           //step 3
+          this.updateScreenContext();
           this.MyPopupService.showErrorPopup(
             `Validation failed: ${this.data.popupState.message}`,
           );

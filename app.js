@@ -4,6 +4,7 @@ import API from "/frontend/services/API.js";
 import VDOMService from "/frontend/services/vDOMService.js";
 import "/frontend/components/UiPopup/UiPopup.js";
 import PopupService from "/frontend/services/PopupService.js";
+import ScreenContextService from "/frontend/services/ScreenContextService.js";
 
 //link components
 import { MainPage } from "/frontend/components/MainPage/MainPage.js";
@@ -11,8 +12,9 @@ import { SolverHomePage } from "/frontend/components/SolverHomePage/SolverHomePa
 import { SolverVariablesPage } from "/frontend/components/SolverVariablesPage/SolverVariablesPage.js";
 
 window.app = {};
+window.app.router = Router;
+window.app.ScreenContextService = ScreenContextService.getInstance();
 const app = window.app;
-app.router = Router;
 
 window.addEventListener("DOMContentLoaded", () => {
   console.log("App: DOMContentLoaded event listener callback");
