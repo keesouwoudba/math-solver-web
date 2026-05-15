@@ -1,114 +1,201 @@
 🧮 Math Solver Web
 
-A simple web application for solving mathematical expressions using a
-Python backend and a lightweight frontend.
+A modern web application for solving mathematical expressions using a Python Flask backend and a component-based JavaScript frontend with Web Components.
 
-Простое веб-приложение для решения математических выражений с
-использованием Python (backend) и HTML/CSS/JS (frontend).
+Современное веб-приложение для решения математических выражений с использованием Python Flask (backend) и Web Components (frontend).
 
-------------------------------------------------------------------------
+---
 
-⚠️ **PROJECT STATUS: IN PROGRESS**
+⚠️ **PROJECT STATUS: ONGOING - ACTIVE DEVELOPMENT**
 
-This project is currently under active development. Features and functionality may change.
+This project is under continuous development. Features, structure, and functionality are subject to change as the project evolves.
 
-------------------------------------------------------------------------
+---
 
 🚀 Features / Возможности
 
--   Solve math expressions
--   Web interface
--   Python backend
--   API endpoint
--   Cookie-based session state
--   Unit tests
+- Solve mathematical expressions with variable substitution
+- Multi-page interactive web interface
+- Python Flask REST API backend
+- Web Components-based modular frontend
+- Session state management via secure Flask cookies
+- Formula input and variable configuration pages
+- Result recommendations and visualization
+- Unit tests for solver logic
+- Responsive UI with Tailwind CSS
 
-------------------------------------------------------------------------
+---
 
 📁 Project Structure
 
-math-solver-web-main/ │ ├── backend/ │ ├── app.py # Main server (API) │
-└── solver.py # Math solving logic │ ├── frontend/ │ ├── index.html # UI
-│ ├── style.css # Styles │ └── script.js # Frontend logic │ ├── tests/ │
-├── practice_oop.py │ └── test_solver.py │ ├── docs/ │ └── notes.md │
-└── requirements.txt
+```
+math-solver-web/
+├── backend/
+│   ├── app.py              # Flask API server
+│   ├── solver.py           # Math solving engine
+│   └── tests/
+│       └── test_solver.py  # Unit tests
+│
+├── frontend/
+│   ├── components/
+│   │   ├── MainPage/       # Landing page component
+│   │   ├── SolverHomePage/ # Formula entry page
+│   │   ├── SolverVariablesPage/  # Variable configuration
+│   │   └── UiPopup/        # Popup/modal component
+│   │
+│   ├── services/
+│   │   ├── API.js          # Backend API client
+│   │   ├── Router.js       # Client-side routing
+│   │   ├── vDOMService.js  # Virtual DOM utilities
+│   │   ├── PopupService.js # Popup management
+│   │   └── ScreenContextService.js  # Screen state management
+│   │
+│   └── data/               # Data resources
+│
+├── src/
+│   └── input.css           # Tailwind CSS input
+│
+├── stitch_math_solver_sweeper/  # Legacy/archived modules
+│
+├── docs/                   # Documentation
+│
+├── app.js                  # Main application entry point
+├── index.html              # HTML shell
+├── package.json            # Node.js dependencies (Tailwind CSS)
+├── requirements.txt        # Python dependencies
+└── README.md
+```
 
-------------------------------------------------------------------------
+---
 
 ⚙️ Installation / Установка
 
-1)  Clone repository
+1. Clone repository
 
-git clone https://github.com/your-username/math-solver-web.git cd
-math-solver-web
+```bash
+git clone https://github.com/keesouwoudba/math-solver-web.git
+cd math-solver-web
+```
 
-2)  Install dependencies
+2. Create and activate Python virtual environment
 
+```bash
+python -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+```
+
+3. Install Python dependencies
+
+```bash
 pip install -r requirements.txt
+```
 
-Note: Redis is not required in the current version. Solver state is stored
-in Flask signed session cookies.
+4. Install Node.js dependencies (for Tailwind CSS)
 
-------------------------------------------------------------------------
+```bash
+npm install
+```
+
+---
 
 ▶️ Run Backend
 
-cd backend python app.py
+```bash
+cd backend
+python app.py
+```
 
-Server will start on: http://localhost:5000
+Backend server will start on: **http://localhost:5000**
 
-Session behavior:
+**Session behavior:**
 
--   Backend stores solver state in browser cookies via Flask sessions.
--   Frontend requests must include credentials to keep the same session.
+- Backend stores solver state in browser cookies via Flask sessions
+- Signed with secure secret key for safety
+- Frontend requests must include `credentials: "include"` to maintain session
 
-Example fetch config:
+**Example API request:**
 
 ```javascript
 fetch("http://localhost:5000/api/set_formula", {
-	method: "POST",
-	credentials: "include",
-	headers: { "Content-Type": "application/json" },
-	body: JSON.stringify({ formula_string: "S=v*t" })
+  method: "POST",
+  credentials: "include",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ formula_string: "S=v*t" }),
 });
 ```
 
-------------------------------------------------------------------------
+---
 
 🌐 Run Frontend
 
-Open frontend/index.html in your browser.
+1. Build Tailwind CSS:
 
-------------------------------------------------------------------------
+```bash
+npm run build
+```
+
+Or for development (watch mode):
+
+```bash
+npm run dev
+```
+
+2. Open in browser:
+
+```bash
+# Serve index.html through a local web server
+# (not just opening as file:// to allow module imports)
+python -m http.server 8000
+# Then visit: http://localhost:8000
+```
+
+---
 
 🧪 Run Tests
 
+```bash
 pytest
-
-or
-
+# or
 python -m pytest
+```
 
-------------------------------------------------------------------------
+---
 
 🛠️ Technologies Used
 
--   Python
--   Flask (backend)
--   HTML / CSS / JavaScript
--   PyTest
+**Backend:**
 
-------------------------------------------------------------------------
+- Python 3
+- Flask (REST API framework)
+- Flask-CORS (cross-origin requests)
+- Matplotlib (visualization)
 
-📌 Future Improvements
+**Frontend:**
 
--   More math operations
--   Better UI
--   Error handling
--   Deployment
+- Vanilla JavaScript (ES6 modules)
+- Web Components (custom elements)
+- Tailwind CSS (utility-first styling)
+- Client-side routing
 
-------------------------------------------------------------------------
+**Testing:**
 
-👨‍💻 Author
+- PyTest
+
+---
+
+📌 Current Development Areas
+
+- Formula parsing and solving improvements
+- Variable handling and validation
+- UI/UX refinements
+- Additional math operations
+- Error handling and edge cases
+- Deployment pipeline setup
+
+---
+
+👨‍💻 Authors & Contributors
 
 Student project — Software Engineering
+
+Repository: https://github.com/keesouwoudba/math-solver-web
