@@ -27,14 +27,14 @@ export default class ScreenContextService {
     return window.app.ScreenContextService;
   }
 
-  setSolverHomePageData(data, json, hasContext = true) {
+  setSolverHomePageContext(data, json, hasContext = true) {
     console.log("ScreenContextService: Setting SolverHomePage data and JSON");
     this.SolverHomePageData = data;
     this.jsonDataSolverHomePage = json;
     this.solverHomePageHasContext = hasContext;
     console.log("ScreenContextService: Data and JSON set for SolverHomePage");
   }
-  getSolverHomePageData() {
+  getSolverHomePageContext() {
     console.log("ScreenContextService: Getting SolverHomePage data and JSON");
     return {
       data: this.SolverHomePageData,
@@ -42,7 +42,7 @@ export default class ScreenContextService {
     };
   }
 
-  setSolverVariablesPageData(data, json, hasContext = true) {
+  setSolverVariablesPageContext(data, json, hasContext = true) {
     console.log(
       "ScreenContextService: Setting SolverVariablesPage data and JSON",
     );
@@ -53,7 +53,7 @@ export default class ScreenContextService {
       "ScreenContextService: Data and JSON set for SolverVariablesPage",
     );
   }
-  getSolverVariablesPageData() {
+  getSolverVariablesPageContext() {
     console.log(
       "ScreenContextService: Getting SolverVariablesPage data and JSON",
     );

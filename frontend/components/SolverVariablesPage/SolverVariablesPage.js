@@ -1,6 +1,9 @@
 import Router from "../../services/Router.js";
 import ScreenContextService from "../../services/ScreenContextService.js";
+import PopupService from "../../services/PopupService.js";
+import API from "../../services/API.js";
 
+//tomake: cleanup this code
 export class SolverVariablesPage extends HTMLElement {
   app = window.app || {};
 
@@ -18,7 +21,7 @@ export class SolverVariablesPage extends HTMLElement {
 
   radioGroupReference = {
     current: "",
-    chosen: false,
+    isChosen: false,
   };
   constructor() {
     super();
@@ -39,19 +42,35 @@ export class SolverVariablesPage extends HTMLElement {
 
     //get data from global app object (set by previous page)
     const SolverVariablesScreenContext =
-      this.screenContextService.getSolverVariablesPageData();
+      this.screenContextService.getSolverVariablesPageContext();
+
     this.SolverHomePageData =
-      this.screenContextService.getSolverHomePageData()?.data || {};
+      this.screenContextService.getSolverHomePageContext()?.data || {};
     this.jsonDataSolverHomePage =
-      this.screenContextService.getSolverHomePageData()?.json || {};
+      this.screenContextService.getSolverHomePageContext()?.json || {};
 
     this.data = {
       jsonDataSolverVariablesPage: this.jsonDataSolverVariablesPage,
       radioGroupReference: this.radioGroupReference,
+      popupState: {
+        isVisible: false,
+        message: "",
+      },
+      currentFormula: "",
     };
+    this.MyPopupService = new PopupService(this.root, this.data);
     console.log(
       "SolverVariablesPage: Data initialized and stored in global app object",
     );
+  }
+  updateScreenContext() {
+    console.log(
+      "SolverVariablesPage: Updating screen context with current data",
+    );
+    this.screenContextService.setSolverVariablesPageContext({
+      data: this.data,
+      json: this.jsonDataSolverVariablesPage,
+    });
   }
 
   connectedCallback() {
@@ -75,6 +94,17 @@ export class SolverVariablesPage extends HTMLElement {
     this.addVariableOptions();
     this.attachEventListeners();
     console.log("SolverVariablesPage: Render completed");
+  }
+  setChosenVariable(variable) {
+    console.log(
+      `SolverVariablesPage: Setting chosen variable to "${variable}" in radioGroupReference`,
+    );
+    this.data.radioGroupReference.current = variable;
+    this.data.radioGroupReference.isChosen = true;
+    console.log(
+      "SolverVariablesPage: Updated radioGroupReference in data:",
+      this.data.radioGroupReference,
+    );
   }
 
   setCurrentFormula() {
@@ -142,14 +172,23 @@ export class SolverVariablesPage extends HTMLElement {
           `SolverVariablesPage: Missing input or symbol element for variable ${variable}`,
         );
       }
+      if (
+        this.radioGroupReference.isChosen &&
+        this.radioGroupReference.current == variable
+      ) {
+        console.log(
+          `SolverVariablesPage: Pre-selecting variable "${variable}" based on radioGroupReference`,
+        );
+        input.checked = true;
+      }
       variablesGroup.appendChild(variableContent);
     });
   }
   attachEventListeners() {
     console.log("SolverVariablesPage: Attaching event listeners");
-    // 1. as soon as variable option is chosen in radio, update state object data.radioGroupReference.current and data.radioGroupReference.chosen to true, and save it to global app object (so that it can be used in solver home page when user goes back)
+    // 1. as soon as variable option is chosen in radio, update state object data.radioGroupReference.current and data.radioGroupReference.isChosen to true, and save it to global app object (so that it can be used in solver home page when user goes back)
     //2. event listener for back button (go back to solver home page using router, while preserving its previous state(calling updateVDOM with previous state data. make a method inside component so that it would expose random updateVDOM))
-    //3. event listener for solve button (call api, and again save everythng to global app object)
+    //3. event listener for solve button (call api, and again save everythn)
 
     //1. event listener for variable options
     const variableInputs = this.root.querySelectorAll(".variable-input");
@@ -159,8 +198,7 @@ export class SolverVariablesPage extends HTMLElement {
         console.log(
           `SolverVariablesPage: Variable option selected: ${selectedVariable}`,
         );
-        this.data.radioGroupReference.current = selectedVariable;
-        this.data.radioGroupReference.chosen = true;
+        this.setChosenVariable(selectedVariable);
         console.log(
           "SolverVariablesPage: Updated radioGroupReference in data:",
           this.data.radioGroupReference,
@@ -175,7 +213,124 @@ export class SolverVariablesPage extends HTMLElement {
         console.log(
           "SolverVariablesPage: Back button clicked, navigating to SolverHomePage",
         );
+        this.updateScreenContext();
         Router.go("/solver");
+      });
+    }
+
+    //3. event listener for solve button
+    const solveButton = this.root.querySelector("#btn-solve");
+    if (solveButton) {
+      //step1: if no variable chosen, show error message popup
+      //step2: if variable is chosen, call api and save the data from api to screenContext, go by router to the next page(choosing solutions)
+      solveButton.addEventListener("click", async (event) => {
+        console.log("SolverVariablesPage: Solve button clicked");
+        event.preventDefault();
+        //call api to solve the equation with the selected variable and formula
+
+        const { currentFormula } = this.data;
+        const { current: target, isChosen } = this.data.radioGroupReference; //destructure from data
+        console.log(
+          `SolverVariablesPage: Current selection - variable: "${target}", formula: "${currentFormula}", isChosen: ${isChosen}`,
+        );
+
+        if (!isChosen) {
+          console.warn(
+            "SolverVariablesPage: No variable selected, showing error popup",
+          );
+
+          this.MyPopupService.showErrorPopup(
+            "Please select a variable to solve for before proceeding.",
+          ); //returns error popup text
+          return;
+        } else {
+          console.log(
+            "SolverVariablesPage: Variable selected, proceeding to call API",
+          );
+          const responseData = await API.solveForTarget(target);
+          if (responseData.ok) {
+            console.log(
+              "SolverVariablesPage: API call successful, response data:",
+              responseData,
+            );
+          } else {
+            console.error(
+              "SolverVariablesPage: API call failed, response data:",
+              responseData,
+            );
+            this.MyPopupService.showErrorPopup(
+              "An error occurred while solving the equation. Please try again.",
+            );
+            return;
+          }
+          const jsonDataSolverVariablesPage = responseData.data;
+          if (jsonDataSolverVariablesPage) {
+            console.log(
+              "SolverVariablesPage: API response data for solver variables page:",
+              jsonDataSolverVariablesPage,
+            );
+            this.jsonDataSolverVariablesPage = jsonDataSolverVariablesPage;
+            const {
+              status_bool,
+              solutions,
+              error,
+              needs_choice,
+              target,
+              available,
+              required_list_str,
+              formula_string,
+              is_const,
+              is_one_var,
+              is_multi_var,
+              equation_type,
+            } = jsonDataSolverVariablesPage;
+          }
+          if (!status_bool) {
+            console.warn(
+              `SolverVariablesPage: API response indicates failure, showing error ${error} popup`,
+            );
+            this.MyPopupService.showErrorPopup(
+              `Failed to solve for variable "${target}". Server responded with an error "${error}". Please check your formula and try again.`,
+            );
+            this.updateScreenContext();
+            return;
+          } else {
+            console.log(
+              "SolverVariablesPage: API response indicates success, updating screen context and navigating to next page",
+            );
+            this.updateScreenContext();
+            if (needs_choice) {
+              console.log(
+                `SolverVariablesPage: API response indicates multiple solutions, type ${equation_type}, navigating to solutions page`,
+              );
+              Router.go("/solver/solutions");
+            } else {
+              console.log(
+                `SolverVariablesPage: API response indicates single solution or no solution, navigating to sweeper page`,
+              );
+
+              if (is_const) {
+                Router.go("/solver/perform_sweep");
+                console.log(
+                  "SolverVariablesPage: API response indicates constant equation, navigating to perform sweep page",
+                );
+              } else if (is_one_var || is_multi_var) {
+                Router.go("/solver/sweeper");
+                console.log(
+                  "SolverVariablesPage: API response indicates one or multiple variable equation with single solution, navigating to sweeper page",
+                );
+              } else {
+                console.warn(
+                  `SolverVariablesPage: API response indicates unexpected case (not const, not one var, not multi var) ${error}`,
+                );
+                this.MyPopupService.showErrorPopup(
+                  `Unexpected response from server. Unable to determine next steps. Please try again or contact support. Error: ${error}`,
+                );
+                return;
+              }
+            }
+          }
+        }
       });
     }
   }

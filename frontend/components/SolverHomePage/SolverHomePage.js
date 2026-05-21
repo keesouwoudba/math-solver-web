@@ -4,13 +4,12 @@ import ScreenContextService from "../../services/ScreenContextService.js";
 import API from "../../services/API.js";
 import Router from "../../services/Router.js";
 import UiPopup from "../UiPopup/UiPopup.js";
-
-//what is prevVdom and Vdom? vDom is just almost the same object as dynamicVDOM, prevDOM is stringified copy taken when snapshoot is done
-//how the obects are saved. i need to inspect that.
-//on disconnected callback should i save those as well? and then in connected callback again check if there was a state to load
+import Utilities from "./Utilities.js";
+import Handlers from "./Handlers.js";
 
 //tocreate:
 //for calling api on solve, first check if fomula is the same and jsondata has that data. dont even call api if already there is jsonSolverHomePageData
+//clean up the code to funcitonal parts. if needed move utils to another class
 export class SolverHomePage extends HTMLElement {
   app = window.app || {};
 
@@ -228,7 +227,19 @@ export class SolverHomePage extends HTMLElement {
     this.loadCSS();
     this.activateData();
   }
+  connectedCallback() {
+    console.log("SolverHomePage: connectedCallback called");
+    this.MyVDOMService.updateDOM();
+    this.attachEventListeners();
+  }
+  disconnectedCallback() {
+    console.log(
+      "SolverHomePage: disconnectedCallback called, updating screen context",
+    );
+    this.updateScreenContext();
+  }
 
+  //impure instance utilities
   loadCSS() {
     console.log(`SolverHomePage: Loading CSS for SolverHomePage`);
     const styles = document.createElement("style");
@@ -257,7 +268,7 @@ export class SolverHomePage extends HTMLElement {
       };
       this.MyVDOMService = new VDOMService(this.root, this.data);
       this.MyPopupService = new PopupService(this.root, this.data);
-      this.screenContextService.setSolverHomePageData(
+      this.screenContextService.setSolverHomePageContext(
         this.data,
         this.jsonDataSolverHomePage,
       );
@@ -267,16 +278,8 @@ export class SolverHomePage extends HTMLElement {
       this.recreateStateFromScreenContext();
     }
   }
-
-  //once element is on the page
-  connectedCallback() {
-    console.log("SolverHomePage: connectedCallback called");
-    this.MyVDOMService.updateDOM();
-    this.attachEventListeners();
-  }
-
   updateScreenContext() {
-    this.screenContextService.setSolverHomePageData(
+    this.screenContextService.setSolverHomePageContext(
       this.data,
       this.jsonDataSolverHomePage,
     );
@@ -286,20 +289,64 @@ export class SolverHomePage extends HTMLElement {
   }
   recreateStateFromScreenContext() {
     const solverHomePageContext =
-      this.screenContextService.getSolverHomePageData();
-    this.data = solverHomePageContext.data;
-    this.inputStateRef = this.data.inputStateRef;
-    this.vDOM = this.data.vDOM;
-    this.prevDOM = this.data.prevDOM;
+      this.screenContextService.getSolverHomePageContext() || {};
+    //destructure data and json from context
+    ({ data: this.data, jsonDataSolverHomePage: this.jsonDataSolverHomePage } =
+      solverHomePageContext);
+
+    const solverHomePageData = solverHomePageContext.data || {};
+    ({
+      inputStateRef: this.inputStateRef,
+      vDOM: this.vDOM,
+      prevDOM: this.prevDOM,
+    } = solverHomePageData);
+
     this.elems = undefined; //to be recreated by VDOMService
-    this.data.elems = this.elems; //debug mode. TODO: later clean up and remove elems from data and use only this.elems
-    this.dynamicVDOM = this.data.dynamicVDOM; //just in case
-    this.jsonDataSolverHomePage = solverHomePageContext.json;
+    this.data.elems = this.elems; //just in case
+
     this.MyVDOMService = new VDOMService(this.root, this.data);
     this.MyPopupService = new PopupService(this.root, this.data);
 
+    this.data.MyVDOMService = this.MyVDOMService; //to make sure data has the reference to the new instance of VDOMService
+    this.data.MyPopupService = this.MyPopupService; //to make sure data has the reference to the new instance of PopupService
+
     console.log(
       `SolverHomePage: State recreated from screen context with data and JSON`,
+    );
+  }
+
+  setCurrentInput(current) {
+    if (current !== "UNCHANGED") {
+      this.inputStateRef.current = current;
+      console.log(`SolverHomePage: Current input set to "${current}"`);
+    } else {
+      console.log(`SolverHomePage: Current input unchanged`);
+    }
+  }
+
+  setSelectionRange(start, end) {
+    this.inputStateRef.selectionStart = start;
+    this.inputStateRef.selectionEnd = end;
+    console.log(
+      `SolverHomePage: Selection range updated to start=${start}, end=${end}`,
+    );
+  }
+
+  setFocusState(isFocused) {
+    this.inputStateRef.isFocused = isFocused;
+    console.log(`SolverHomePage: Focus state updated to ${isFocused}`);
+  }
+
+  applyInputState({ current, selectionStart, selectionEnd, isFocused = true }) {
+    if (current !== "UNCHANGED") {
+      this.setCurrentInput(current);
+    } else {
+      console.log(`SolverHomePage: Current input unchanged`);
+    }
+    this.setSelectionRange(selectionStart, selectionEnd);
+    this.setFocusState(isFocused);
+    console.log(
+      `SolverHomePage: Input state applied with current="${current}", selectionStart=${selectionStart}, selectionEnd=${selectionEnd}, isFocused=${isFocused}`,
     );
   }
 
@@ -308,18 +355,9 @@ export class SolverHomePage extends HTMLElement {
     const buttons = this.root.querySelectorAll(".btn-switcher");
     const panels = this.root.querySelectorAll(".keypad-grid");
     buttons.forEach((btn) => {
-      btn.addEventListener("click", () => {
-        // remove active from all buttons and panels
-        buttons.forEach((b) => b.classList.remove("active"));
-        panels.forEach((p) => p.classList.remove("active"));
-
-        // activate clicked button and its matching panel
-        btn.classList.add("active");
+      btn.addEventListener("click", (event) => {
         const targetPanel = this.root.querySelector(`#${btn.dataset.target}`);
-        if (!targetPanel) {
-          return;
-        }
-        targetPanel.classList.add("active");
+        Handlers.tabSwitchHandler(buttons, panels, btn, targetPanel);
       });
     });
 
@@ -327,49 +365,31 @@ export class SolverHomePage extends HTMLElement {
     const textarea = this.root.querySelector("#formula-input");
     if (textarea) {
       this.root.addEventListener("focusin", (event) => {
-        const target = event.target;
-        if (!(target instanceof HTMLTextAreaElement)) {
-          return;
-        }
-        if (target.id !== "formula-input") {
-          return;
-        }
-        this.inputStateRef.isFocused = true;
-        console.log(`SolverHomePage: Textarea focused`);
+        this.setFocusState(
+          Handlers.focusinHandler(event) || this.inputStateRef.isFocused,
+        );
       });
       this.root.addEventListener("focusout", (event) => {
-        const target = event.target;
-        if (!(target instanceof HTMLTextAreaElement)) {
-          return;
-        }
-        if (target.id !== "formula-input") {
-          return;
-        }
-        this.inputStateRef.isFocused = false;
-        console.log(`SolverHomePage: Textarea focusout`);
+        this.setFocusState(
+          Handlers.focusoutHandler(event)
+            ? false
+            : this.inputStateRef.isFocused,
+        );
       });
     }
 
     // delegated input handler survives DOM node replacement after patching, but anyway i want to edit it not to replace full element, but just value
     this.root.addEventListener("input", (event) => {
-      const target = event.target;
-      if (!(target instanceof HTMLTextAreaElement)) {
-        return;
-      }
-      if (target.id !== "formula-input") {
-        return;
-      }
-
+      const result = Handlers.inputChangeHandler(event);
+      if (!result) return;
       this.MyVDOMService.takeSnapshot();
-      this.inputStateRef.current = target.value;
-      this.inputStateRef.selectionStart = target.selectionStart;
-      this.inputStateRef.selectionEnd = target.selectionEnd;
-      this.inputStateRef.isFocused = target.matches(":focus");
-
+      //mutate the data
+      this.applyInputState(result);
       console.log(
         `SolverHomePage: User input updated to "${this.inputStateRef.current}"`,
       );
       this.MyVDOMService.updateDOM("from user input change");
+      this.updateScreenContext();
     });
 
     //add event listener for clear button
@@ -379,10 +399,12 @@ export class SolverHomePage extends HTMLElement {
         this.MyVDOMService.takeSnapshot();
 
         //clear input and save cursor position
-        this.inputStateRef.current = "";
-        this.inputStateRef.selectionStart = 0;
-        this.inputStateRef.selectionEnd = 0;
-        this.inputStateRef.isFocused = false;
+        this.applyInputState({
+          current: "",
+          selectionStart: 0,
+          selectionEnd: 0,
+          isFocused: false,
+        });
 
         console.log(`SolverHomePage: Clear button clicked, user input cleared`);
         this.MyVDOMService.updateDOM("from clear button click");
@@ -402,25 +424,14 @@ export class SolverHomePage extends HTMLElement {
         const s = Math.min(start, end);
         const e = Math.max(start, end);
 
-        let nextValue = value;
-        let nextPos = s;
-        if (s !== e) {
-          nextValue = value.slice(0, s) + value.slice(e);
-          nextPos = s;
-        } else if (s > 0) {
-          nextValue = value.slice(0, s - 1) + value.slice(e);
-          nextPos = s - 1;
-        }
-
-        this.inputStateRef.current = nextValue;
-        this.inputStateRef.selectionStart = nextPos;
-        this.inputStateRef.selectionEnd = nextPos;
-        this.inputStateRef.isFocused = true;
+        const result = Handlers.backspaceButtonHandler(value, s, e);
+        this.applyInputState(result);
 
         console.log(
           `SolverHomePage: Backspace button clicked, user input updated to "${this.inputStateRef.current}"`,
         );
         this.MyVDOMService.updateDOM("from backspace button click");
+        this.updateScreenContext();
       });
     }
 
@@ -429,93 +440,33 @@ export class SolverHomePage extends HTMLElement {
       this.root.querySelectorAll(".button-white");
     operatorAndFunctionButtons.forEach((btn) => {
       btn.addEventListener("click", (event) => {
-        const target = event.target;
-        if (!(target instanceof HTMLButtonElement)) {
-          return;
-        }
-        const valueToInsert = target.value;
-        if (!valueToInsert) {
-          return;
-        }
-        const id = target.id;
-        if (!id) {
-          return;
-        }
         this.MyVDOMService.takeSnapshot();
+        const textarea = this.root.querySelector("#formula-input"); //pass textarea as arg
 
-        // save cursor position first
-        const textarea = this.root.querySelector("#formula-input");
-        if (textarea) {
-          const start = textarea.selectionStart ?? 0;
-          const end = textarea.selectionEnd ?? start;
-          const dir = textarea.selectionDirection;
-          const caret = dir === "backward" ? start : end;
-          this.inputStateRef.selectionStart = caret;
-          this.inputStateRef.selectionEnd = caret;
-          this.inputStateRef.isFocused = true;
+        const result = Utilities.saveCaretPositions(event, textarea);
+        if (!result.status) {
+          return;
         }
-        //i will hardcode the logic and add such logic that it will validate by regex, insert whatever's needed , for example for pow it will insert ()**() and put cursor in the middle, for functions it will insert function() and put cursor in the middle of parentheses, for operators it will just insert operator at cursor position.
+        const { valueToInsert, id } = result;
+        this.applyInputState(result);
 
-        //i stopped here: i need to think about regex which will take the last valid thing just before the crsor. and not something if there is one space
         if (id.startsWith("operator-")) {
+          //operator handler function: receives: this.data.inputStateRef returns: {status, current, selectionStart, selectionEnd, isFocused=true}
           //move cursor to the end of inserted operator for default
-          if (!valueToInsert.includes("()**()")) {
-            //  +-*/ operators
-            this.data.inputStateRef.current = `${this.data.inputStateRef.current.slice(0, this.data.inputStateRef.selectionStart)} ${valueToInsert} ${this.data.inputStateRef.current.slice(this.data.inputStateRef.selectionEnd)}`;
-            this.data.inputStateRef.selectionStart += valueToInsert.length + 2;
-            this.data.inputStateRef.selectionEnd =
-              this.data.inputStateRef.selectionStart;
-          } else {
-            //for pow operator: identify if there is something already that can be raised onto power. check with regex. if there is something valid, then insert that thing into first parentheses, and put cursor in second parentheses, if there is nothing valid to raise to power, just insert ()**() and put cursor in the middle of first parentheses
-            const beforeCursor = this.data.inputStateRef.current.slice(
-              0,
-              this.data.inputStateRef.selectionStart,
-            ); //x + 1
-            const regex = /([a-zA-Z0-9\)]+)$/; // better make a capturing group for the last valid thing to raise to the power
-            const match = beforeCursor.match(regex);
-            if (match) {
-              const toWrap = match?.[match.length - 1] || "";
-              const startIdx =
-                this.data.inputStateRef.selectionStart - toWrap.length; //x*1 + {|6}vvv{|9} -> x*1 + ({|789}vvv)**({|14})
-              this.data.inputStateRef.current = `${this.data.inputStateRef.current.slice(0, startIdx)}(${toWrap})**() ${this.data.inputStateRef.current.slice(this.data.inputStateRef.selectionStart)}`;
-              this.data.inputStateRef.selectionStart = //x*1 + {|6 in v}vvv{|9} -> x*1 + ({|789}vvv)**({|14})
-                startIdx + toWrap.length + 5; //to move cursor inside second parentheses
-              this.data.inputStateRef.selectionEnd =
-                this.data.inputStateRef.selectionStart;
-            } else {
-              //means there is nothing to wrap, just insert ()**() and put cursor in the middle of first parentheses
-              this.data.inputStateRef.current = `${this.data.inputStateRef.current.slice(0, this.data.inputStateRef.selectionStart)} ()**() ${this.data.inputStateRef.current.slice(this.data.inputStateRef.selectionEnd)}`;
-              this.data.inputStateRef.selectionStart += 2; //to move cursor in the middle of first parentheses
-              this.data.inputStateRef.selectionEnd = //3 * x + 1
-                this.data.inputStateRef.selectionStart;
-            }
-          }
+          const result = Handlers.operatorButtonHandler(
+            this.data.inputStateRef,
+            valueToInsert,
+            id,
+          );
+          this.applyInputState(result);
         } else if (id.startsWith("function-")) {
           //check with regex if * is needed to insert
-          const beforeCursor = this.data.inputStateRef.current.slice(
-            0,
-            this.data.inputStateRef.selectionStart,
+          const result = Handlers.functionButtonHandler(
+            this.data.inputStateRef,
+            valueToInsert,
+            id,
           );
-          const regex = /([a-zA-Z0-9\)]+)$/;
-          const match = beforeCursor.match(regex);
-          const lastMatch = match?.[match.length - 1] || "";
-          if (match) {
-            //there is smth before cursor that can be multiplied, so insert * before function
-            this.data.inputStateRef.current = `${this.data.inputStateRef.current.slice(0, this.data.inputStateRef.selectionStart)} * ${valueToInsert}${this.data.inputStateRef.current.slice(this.data.inputStateRef.selectionEnd)}`;
-            this.data.inputStateRef.selectionStart +=
-              3 + valueToInsert.indexOf("()") + 1; //to move cursor in the middle of parentheses of function
-            this.data.inputStateRef.selectionEnd =
-              this.data.inputStateRef.selectionStart;
-          } else {
-            //there is nothing valid to multiply, just insert function() and put cursor in the middle of parentheses
-            //insert function with parentheses and put cursor in the middle
-            this.data.inputStateRef.current = `${this.data.inputStateRef.current.slice(0, this.data.inputStateRef.selectionStart)} ${valueToInsert}${this.data.inputStateRef.current.slice(this.data.inputStateRef.selectionEnd)}`;
-            //move cursor to the middle of parentheses
-            this.data.inputStateRef.selectionStart +=
-              1 + valueToInsert.indexOf("()") + 1; // ff *-> ff * sin(|)
-            this.data.inputStateRef.selectionEnd =
-              this.data.inputStateRef.selectionStart;
-          }
+          this.applyInputState(result);
         }
         this.MyVDOMService.updateDOM(
           `from operator/function button click, id: ${id}`,
@@ -533,7 +484,9 @@ export class SolverHomePage extends HTMLElement {
         //step3: if validation is bad, show popup with the error mesage and real problem user had in syntax
 
         //step1:
-        const isValid = this.validateSyntax(this.data.inputStateRef.current);
+        const [isValid, message] = Utilities.validateSyntax(
+          this.data.inputStateRef.current,
+        );
 
         //step2:
         if (isValid) {
@@ -542,21 +495,32 @@ export class SolverHomePage extends HTMLElement {
           );
           if (responseData.ok) {
             console.log(`SolverHomePage: set formula response ok`);
+          } else {
+            console.error(
+              `SolverHomePage: set formula API call failed with status ${responseData.status}`,
+            );
+            this.MyPopupService.showErrorPopup(
+              `Failed to set formula. Server responded with status ${responseData.status}. Please try again.`,
+            );
+            return;
           }
           const jsonDataSolverHomePage = responseData.data;
           if (jsonDataSolverHomePage) {
             console.log(`SolverHomePage: Server response indicates success`);
             // we are supposed to take the variables from the equation and move to the next page (for choosing the varibales)
-            this.jsonDataSolverHomePage = jsonDataSolverHomePage;
-            window.app.jsonDataSolverHomePage = jsonDataSolverHomePage;
+            this.jsonDataSolverHomePage = jsonDataSolverHomePage; //before this is was replacing all manual assignemnts with faca
             const { variables, status_bool, valid, error, formula_string } =
               jsonDataSolverHomePage;
 
             if (status_bool && valid) {
+              this.data.popupState.message =
+                message ||
+                "formula is valid, moving to variable selection page";
               this.updateScreenContext();
               Router.go("/solver/variables");
             } else {
               //step 3
+              this.data.popupState.message = error || "unknown error";
               this.updateScreenContext();
               this.MyPopupService.showErrorPopup(
                 `Validation failed: ${error || "unknown error"}, formula string: ${formula_string || "not provided"}, variables parsed: ${variables ? variables.join(", ") : "not provided"}`,
@@ -565,102 +529,13 @@ export class SolverHomePage extends HTMLElement {
           }
         } else {
           //step 3
+          this.data.popupState.message = message || "unknown validation error";
           this.updateScreenContext();
           this.MyPopupService.showErrorPopup(
             `Validation failed: ${this.data.popupState.message}`,
           );
         }
       });
-    }
-  }
-  validateSyntax(formulaString) {
-    const RESERVED_FUNCTIONS = [
-      "sin",
-      "cos",
-      "arcsin",
-      "arccos",
-      "tan",
-      "arctan",
-      "cot",
-      "arccot",
-      "asin",
-      "acos",
-      "atan",
-      "acot",
-      "sinh",
-      "cosh",
-      "tanh",
-      "asinh",
-      "acosh",
-      "atanh",
-      "sqrt",
-      "pi",
-      "log",
-      "ln",
-      "exp",
-      "abs",
-      "factorial",
-      "E",
-      "I",
-    ];
-
-    const trimmedFormula = (formulaString || "").trim();
-    if (!trimmedFormula) {
-      this.data.popupState.message = "formula_string is required";
-      return false;
-    }
-
-    const equalsMatches = trimmedFormula.match(/=/g) || [];
-    if (equalsMatches.length !== 1) {
-      this.data.popupState.message = "the string must contain exactly one '='";
-      return false;
-    }
-
-    const [lhs, rhs] = trimmedFormula.split("=");
-    if (!lhs.trim() || !rhs.trim()) {
-      this.data.popupState.message = "both sides of '=' must be non-empty";
-      return false;
-    }
-
-    const patternDigitFollowedByTerm = /(\d)([a-zA-Z_]|\()/;
-    const patternParenFollowedByTerm = /([)])(\d|[a-zA-Z_]|\()/;
-    const workingFormula = trimmedFormula;
-    if (
-      patternDigitFollowedByTerm.test(workingFormula) ||
-      patternParenFollowedByTerm.test(workingFormula)
-    ) {
-      this.data.popupState.message =
-        "the string contains implied multiplication like 3a, 3(a+b): please use explicit (e.g. 3*a)";
-      return false;
-    }
-
-    const patternWordParen = /\b([a-zA-Z_][a-zA-Z0-9_]*)\(/g;
-    const funcMatches = workingFormula.match(patternWordParen) || [];
-
-    for (const match of funcMatches) {
-      const funcName = match.slice(0, -1); // to remove the ( at the end
-      if (!RESERVED_FUNCTIONS.includes(funcName)) {
-        this.data.popupState.message = `the string contains implied multiplication like ${funcName}(something): please use explicit (e.g. ${funcName}*(something))`;
-        return false;
-      }
-    }
-
-    const variables = parseVariables(workingFormula);
-    if (variables.length < 1) {
-      this.data.popupState.message =
-        "the formula must have at least 1 variable";
-      return false;
-    }
-
-    return true;
-    function parseVariables(formulaString) {
-      const pattern = /[a-zA-Z_][a-zA-Z0-9_]*/g;
-      const unfilteredWords = formulaString.match(pattern) || [];
-      const uniqueWords = new Set(unfilteredWords);
-      let variablesList = Array.from(uniqueWords).filter(
-        (word) => !RESERVED_FUNCTIONS.includes(word),
-      );
-      return variablesList.sort();
     }
   }
 }

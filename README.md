@@ -95,7 +95,7 @@ pip install -r requirements.txt
 ```bash
 npm install
 ```
-
+(it already has compiled in output, but anyways)
 ---
 
 ▶️ Run Backend
