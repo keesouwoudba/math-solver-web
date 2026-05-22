@@ -1,3 +1,5 @@
+import ChacheingService from "./ChacheingService.js";
+
 class API {
   // ===== Constants =====
   static #RESERVED_FUNCTIONS = new Set([
@@ -33,8 +35,11 @@ class API {
   static #TINY_PNG_BASE64 =
     "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/wcAAgMBApG3xQAAAABJRU5ErkJggg==";
 
-  static #baseUrl = "/api";
+  static #baseUrl = "http://127.0.0.1:5000";
   static #useExamples = true;
+
+  // === chahce service object ==
+  static cacheingService = new ChacheingService();
 
   // ===== Config =====
   static setBaseUrl(url) {
@@ -575,7 +580,7 @@ class API {
 
   // ===== Real API =====
   static #realStatus() {
-    return this.#requestJson("", { method: "GET" });
+    return this.#requestJson("/api", { method: "GET" });
   }
 
   static #realSetFormula(formula_string) {
@@ -624,40 +629,116 @@ class API {
     return this.#useExamples ? this.#exampleStatus() : this.#realStatus();
   }
 
-  static setFormula(formula_string) {
-    return this.#useExamples
-      ? this.#exampleSetFormula(formula_string)
-      : this.#realSetFormula(formula_string);
+  static setFormula(requestObject) {
+    const { formula_string: formula_string } = requestObject || {};
+    const cacheResponse =
+      this.cacheingService.getSetFormulaCache(requestObject);
+    if (cacheResponse) {
+      return Promise.resolve(cacheResponse);
+    } else {
+      const response = this.#useExamples
+        ? this.#exampleSetFormula(formula_string)
+        : this.#realSetFormula(formula_string);
+      this.cacheingService.addSetFormulaCache(requestObject, response);
+      return Promise.resolve(response);
+    }
   }
 
-  static solveForTarget(target) {
-    return this.#useExamples
-      ? this.#exampleSolveForTarget(target)
-      : this.#realSolveForTarget(target);
+  static solveForTarget(requestObject) {
+    const { formula_string: formula_string, target: target } =
+      requestObject || {};
+    const cacheResponse =
+      this.cacheingService.getSolveForTargetCache(requestObject);
+    if (cacheResponse) {
+      return Promise.resolve(cacheResponse);
+    } else {
+      const response = this.#useExamples
+        ? this.#exampleSolveForTarget(target)
+        : this.#realSolveForTarget(target);
+      this.cacheingService.addSolveForTargetCache(requestObject, response);
+      return Promise.resolve(response);
+    }
   }
 
-  static chooseSolution(index) {
-    return this.#useExamples
-      ? this.#exampleChooseSolution(index)
-      : this.#realChooseSolution(index);
+  static chooseSolution(requestObject) {
+    const {
+      formula_string: formula_string,
+      target: target,
+      index: index,
+    } = requestObject || {};
+    const cacheResponse =
+      this.cacheingService.getChooseSolutionCache(requestObject);
+    if (cacheResponse) {
+      return Promise.resolve(cacheResponse);
+    } else {
+      const response = this.#useExamples
+        ? this.#exampleChooseSolution(index)
+        : this.#realChooseSolution(index);
+      this.cacheingService.addChooseSolutionCache(requestObject, response);
+      return Promise.resolve(response);
+    }
   }
 
-  static passSweeper(sweeper) {
-    return this.#useExamples
-      ? this.#examplePassSweeper(sweeper)
-      : this.#realPassSweeper(sweeper);
+  static passSweeper(requestObject) {
+    const {
+      formula_string: formula_string,
+      target: target,
+      index: index,
+      sweeper: sweeper,
+    } = requestObject || {};
+    const cacheResponse =
+      this.cacheingService.getPassSweeperCache(requestObject);
+    if (cacheResponse) {
+      return Promise.resolve(cacheResponse);
+    } else {
+      const response = this.#useExamples
+        ? this.#examplePassSweeper(sweeper)
+        : this.#realPassSweeper(sweeper);
+      this.cacheingService.addPassSweeperCache(requestObject, response);
+      return Promise.resolve(response);
+    }
   }
 
-  static verifyFixed(fixed) {
-    return this.#useExamples
-      ? this.#exampleVerifyFixed(fixed)
-      : this.#realVerifyFixed(fixed);
+  static verifyFixed(requestObject) {
+    const {
+      formula_string: formula_string,
+      target: target,
+      index: index,
+      fixed: fixed,
+    } = requestObject || {};
+    const cacheResponse =
+      this.cacheingService.getVerifyFixedCache(requestObject);
+    if (cacheResponse) {
+      return Promise.resolve(cacheResponse);
+    } else {
+      const response = this.#useExamples
+        ? this.#exampleVerifyFixed(fixed)
+        : this.#realVerifyFixed(fixed);
+      this.cacheingService.addVerifyFixedCache(requestObject, response);
+      return Promise.resolve(response);
+    }
   }
 
-  static performSweep({ start, end, steps }) {
-    return this.#useExamples
-      ? this.#examplePerformSweep({ start, end, steps })
-      : this.#realPerformSweep({ start, end, steps });
+  static performSweep(requestObject) {
+    const {
+      formula_string: formula_string,
+      target: target,
+      index: index,
+      start: start,
+      end: end,
+      steps: steps,
+    } = requestObject || {};
+    const cacheResponse =
+      this.cacheingService.getPerformSweepCache(requestObject);
+    if (cacheResponse) {
+      return Promise.resolve(cacheResponse);
+    } else {
+      const response = this.#useExamples
+        ? this.#examplePerformSweep({ start, end, steps })
+        : this.#realPerformSweep({ start, end, steps });
+      this.cacheingService.addPerformSweepCache(requestObject, response);
+      return Promise.resolve(response);
+    }
   }
 }
 

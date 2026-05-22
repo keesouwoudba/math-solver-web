@@ -29,6 +29,7 @@ export class SolverVariablesPage extends HTMLElement {
     this.loadCss();
     this.initData();
   }
+
   loadCss() {
     console.log("SolverVariablesPage: Loading CSS for the component");
     const styles = document.createElement("style");
@@ -37,6 +38,7 @@ export class SolverVariablesPage extends HTMLElement {
     this.root.appendChild(styles);
     console.log("SolverVariablesPage: CSS loaded and appended to shadow root");
   }
+
   initData() {
     console.log("SolverVariablesPage: Initializing data for the component");
 
@@ -48,6 +50,11 @@ export class SolverVariablesPage extends HTMLElement {
       this.screenContextService.getSolverHomePageContext()?.data || {};
     this.jsonDataSolverHomePage =
       this.screenContextService.getSolverHomePageContext()?.json || {};
+
+    if (SolverVariablesScreenContext?.data?.radioGroupReference) {
+      this.radioGroupReference =
+        SolverVariablesScreenContext.data.radioGroupReference;
+    }
 
     this.data = {
       jsonDataSolverVariablesPage: this.jsonDataSolverVariablesPage,
@@ -63,14 +70,15 @@ export class SolverVariablesPage extends HTMLElement {
       "SolverVariablesPage: Data initialized and stored in global app object",
     );
   }
+
   updateScreenContext() {
     console.log(
       "SolverVariablesPage: Updating screen context with current data",
     );
-    this.screenContextService.setSolverVariablesPageContext({
-      data: this.data,
-      json: this.jsonDataSolverVariablesPage,
-    });
+    this.screenContextService.setSolverVariablesPageContext(
+      this.data,
+      this.jsonDataSolverVariablesPage,
+    );
   }
 
   connectedCallback() {
@@ -95,17 +103,6 @@ export class SolverVariablesPage extends HTMLElement {
     this.attachEventListeners();
     console.log("SolverVariablesPage: Render completed");
   }
-  setChosenVariable(variable) {
-    console.log(
-      `SolverVariablesPage: Setting chosen variable to "${variable}" in radioGroupReference`,
-    );
-    this.data.radioGroupReference.current = variable;
-    this.data.radioGroupReference.isChosen = true;
-    console.log(
-      "SolverVariablesPage: Updated radioGroupReference in data:",
-      this.data.radioGroupReference,
-    );
-  }
 
   setCurrentFormula() {
     const formula =
@@ -124,7 +121,6 @@ export class SolverVariablesPage extends HTMLElement {
       console.warn("SolverVariablesPage: #formula-value element not found");
     }
   }
-
   addVariableOptions() {
     console.log("SolverVariablesPage: Adding variable options to the page");
 
@@ -172,18 +168,44 @@ export class SolverVariablesPage extends HTMLElement {
           `SolverVariablesPage: Missing input or symbol element for variable ${variable}`,
         );
       }
-      if (
-        this.radioGroupReference.isChosen &&
-        this.radioGroupReference.current == variable
-      ) {
-        console.log(
-          `SolverVariablesPage: Pre-selecting variable "${variable}" based on radioGroupReference`,
-        );
-        input.checked = true;
-      }
       variablesGroup.appendChild(variableContent);
     });
+
+    this.restoreVariableSelection();
   }
+
+  setChosenVariable(variable) {
+    console.log(
+      `SolverVariablesPage: Setting chosen variable to "${variable}" in radioGroupReference`,
+    );
+    this.data.radioGroupReference.current = variable;
+    this.data.radioGroupReference.isChosen = true;
+    console.log(
+      "SolverVariablesPage: Updated radioGroupReference in data:",
+      this.data.radioGroupReference,
+    );
+  }
+
+  restoreVariableSelection() {
+    const radioGroupReference = this.data.radioGroupReference;
+    const { current, isChosen } = radioGroupReference;
+    if (isChosen && current) {
+      const variableInputs = this.root.querySelectorAll(".variable-input");
+      variableInputs.forEach((input) => {
+        if (input.value === current) {
+          input.checked = true;
+          console.log(
+            `SolverVariablesPage: Restored variable selection for "${current}"`,
+          );
+        }
+      });
+    } else {
+      console.log(
+        "SolverVariablesPage: No previous variable selection to restore",
+      );
+    }
+  }
+
   attachEventListeners() {
     console.log("SolverVariablesPage: Attaching event listeners");
     // 1. as soon as variable option is chosen in radio, update state object data.radioGroupReference.current and data.radioGroupReference.isChosen to true, and save it to global app object (so that it can be used in solver home page when user goes back)
@@ -247,7 +269,10 @@ export class SolverVariablesPage extends HTMLElement {
           console.log(
             "SolverVariablesPage: Variable selected, proceeding to call API",
           );
-          const responseData = await API.solveForTarget(target);
+          const responseData = await API.solveForTarget({
+            target: target,
+            formula_string: currentFormula,
+          });
           if (responseData.ok) {
             console.log(
               "SolverVariablesPage: API call successful, response data:",
@@ -275,7 +300,6 @@ export class SolverVariablesPage extends HTMLElement {
               solutions,
               error,
               needs_choice,
-              target,
               available,
               required_list_str,
               formula_string,
@@ -283,52 +307,61 @@ export class SolverVariablesPage extends HTMLElement {
               is_one_var,
               is_multi_var,
               equation_type,
-            } = jsonDataSolverVariablesPage;
-          }
-          if (!status_bool) {
-            console.warn(
-              `SolverVariablesPage: API response indicates failure, showing error ${error} popup`,
-            );
-            this.MyPopupService.showErrorPopup(
-              `Failed to solve for variable "${target}". Server responded with an error "${error}". Please check your formula and try again.`,
-            );
-            this.updateScreenContext();
-            return;
-          } else {
-            console.log(
-              "SolverVariablesPage: API response indicates success, updating screen context and navigating to next page",
-            );
-            this.updateScreenContext();
-            if (needs_choice) {
-              console.log(
-                `SolverVariablesPage: API response indicates multiple solutions, type ${equation_type}, navigating to solutions page`,
+            } = jsonDataSolverVariablesPage || {};
+            if (!status_bool) {
+              console.warn(
+                `SolverVariablesPage: API response indicates failure, showing error ${error} popup`,
               );
-              Router.go("/solver/solutions");
+              this.MyPopupService.showErrorPopup(
+                `Failed to solve for variable "${target}". Server responded with an error "${error}". Please check your formula and try again.`,
+              );
+              this.updateScreenContext();
+              return;
             } else {
               console.log(
-                `SolverVariablesPage: API response indicates single solution or no solution, navigating to sweeper page`,
+                "SolverVariablesPage: API response indicates success, updating screen context and navigating to next page: in esle block, no nav yet for now",
               );
-
-              if (is_const) {
-                Router.go("/solver/perform_sweep");
+              this.updateScreenContext();
+              if (needs_choice) {
                 console.log(
-                  "SolverVariablesPage: API response indicates constant equation, navigating to perform sweep page",
+                  `SolverVariablesPage: API response indicates multiple solutions, type ${equation_type}, navigating to solutions page`,
                 );
-              } else if (is_one_var || is_multi_var) {
-                Router.go("/solver/sweeper");
-                console.log(
-                  "SolverVariablesPage: API response indicates one or multiple variable equation with single solution, navigating to sweeper page",
-                );
+                Router.go("/solver/solutions");
               } else {
-                console.warn(
-                  `SolverVariablesPage: API response indicates unexpected case (not const, not one var, not multi var) ${error}`,
+                console.log(
+                  `SolverVariablesPage: API response indicates single solution or no solution, navigating to sweeper page`,
                 );
-                this.MyPopupService.showErrorPopup(
-                  `Unexpected response from server. Unable to determine next steps. Please try again or contact support. Error: ${error}`,
-                );
-                return;
+
+                if (is_const) {
+                  Router.go("/solver/perform_sweep");
+                  console.log(
+                    "SolverVariablesPage: API response indicates constant equation, navigating to perform sweep page",
+                  );
+                } else if (is_one_var || is_multi_var) {
+                  Router.go("/solver/sweeper");
+                  console.log(
+                    "SolverVariablesPage: API response indicates one or multiple variable equation with single solution, navigating to sweeper page",
+                  );
+                } else {
+                  console.warn(
+                    `SolverVariablesPage: API response indicates unexpected case (not const, not one var, not multi var) ${error}`,
+                  );
+                  this.MyPopupService.showErrorPopup(
+                    `Unexpected response from server. Unable to determine next steps. Please try again or contact support. Error: ${error}`,
+                  );
+                  return;
+                }
               }
             }
+          } else {
+            console.error(
+              "SolverVariablesPage: API call did not return expected data, response data:",
+              responseData,
+            );
+            this.MyPopupService.showErrorPopup(
+              "An unexpected error occurred while processing the solution. Please try again.",
+            );
+            return;
           }
         }
       });

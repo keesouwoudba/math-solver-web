@@ -9,7 +9,7 @@ import Handlers from "./Handlers.js";
 
 //tocreate:
 //for calling api on solve, first check if fomula is the same and jsondata has that data. dont even call api if already there is jsonSolverHomePageData
-//clean up the code to funcitonal parts. if needed move utils to another class
+
 export class SolverHomePage extends HTMLElement {
   app = window.app || {};
 
@@ -490,9 +490,9 @@ export class SolverHomePage extends HTMLElement {
 
         //step2:
         if (isValid) {
-          const responseData = await API.setFormula(
-            this.data.inputStateRef.current,
-          );
+          const responseData = await API.setFormula({
+            formula_string: this.data.inputStateRef.current,
+          });
           if (responseData.ok) {
             console.log(`SolverHomePage: set formula response ok`);
           } else {

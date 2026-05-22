@@ -9,6 +9,8 @@ export default class ScreenContextService {
   //solverVariablesPage
   SolverVariablesPageData;
   jsonDataSolverVariablesPage;
+  solverVariablesPageHasContext;
+
   constructor() {
     console.log("ScreenContextService: Initializing service");
     window.app.ScreenContextService = this;
