@@ -1,28 +1,8 @@
-const $ = function (args) {
-  return document.querySelector(args);
-};
-const $$ = function (args) {
-  return document.querySelectorAll(args);
-};
-HTMLElement.prototype.on = function (a, b, c) {
-  return this.addEventListener(a, b, c);
-};
-HTMLElement.prototype.off = function (a, b) {
-  return this.removeEventListener(a, b);
-};
-HTMLElement.prototype.$ = function (s) {
-  return this.querySelector(s);
-};
-HTMLElement.prototype.$$ = function (s) {
-  return this.querySelectorAll(s);
-};
-//returns nodelist, thats why do [...el.$("needed")] to make it array with methods like map filter.
-
 const Router = {
   init: () => {
     console.log("Router: Router initialized");
-    $$("a.navlink").forEach((a) => {
-      a.on("click", (event) => {
+    document.querySelectorAll("a.navlink").forEach((a) => {
+      a.addEventListener("click", (event) => {
         event.preventDefault();
         console.log("a.navlink clicked in listener");
         const url = a.getAttribute("href");
@@ -68,7 +48,7 @@ const Router = {
     }
     if (pageElement) {
       console.log("Router: Page element exists, rendering page");
-      const main = $("main");
+      const main = document.querySelector("main");
       main.replaceChildren(pageElement);
       window.scrollX = 0;
       window.scrollY = 0;

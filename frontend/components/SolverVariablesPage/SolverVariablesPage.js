@@ -33,7 +33,6 @@ export class SolverVariablesPage extends HTMLElement {
   loadCss() {
     console.log("SolverVariablesPage: Loading CSS for the component");
     const styles = document.createElement("style");
-    styles.setAttribute("data-solver-variables", "");
     styles.textContent = `@import "/frontend/components/SolverVariablesPage/SolverVariablesPage.css";`;
     this.root.appendChild(styles);
     console.log("SolverVariablesPage: CSS loaded and appended to shadow root");
@@ -41,7 +40,6 @@ export class SolverVariablesPage extends HTMLElement {
 
   initData() {
     console.log("SolverVariablesPage: Initializing data for the component");
-
     //get data from global app object (set by previous page)
     const SolverVariablesScreenContext =
       this.screenContextService.getSolverVariablesPageContext();
@@ -50,12 +48,10 @@ export class SolverVariablesPage extends HTMLElement {
       this.screenContextService.getSolverHomePageContext()?.data || {};
     this.jsonDataSolverHomePage =
       this.screenContextService.getSolverHomePageContext()?.json || {};
-
     if (SolverVariablesScreenContext?.data?.radioGroupReference) {
       this.radioGroupReference =
         SolverVariablesScreenContext.data.radioGroupReference;
     }
-
     this.data = {
       jsonDataSolverVariablesPage: this.jsonDataSolverVariablesPage,
       radioGroupReference: this.radioGroupReference,
@@ -84,6 +80,11 @@ export class SolverVariablesPage extends HTMLElement {
   connectedCallback() {
     this.render();
   }
+  disconnectedCallback() {
+    console.log("SolverVariablesPage: Component disconnected, cleaning up");
+
+    this.updateScreenContext();
+  }
 
   render() {
     console.log("SolverVariablesPage: render called");
@@ -94,10 +95,7 @@ export class SolverVariablesPage extends HTMLElement {
       return;
     }
     const pageContent = pageTemplate.content.cloneNode(true);
-    const styleElement = this.root.querySelector(
-      "style[data-solver-variables]",
-    );
-    this.root.replaceChildren(styleElement, pageContent);
+    this.root.appendChild(pageContent);
     this.setCurrentFormula();
     this.addVariableOptions();
     this.attachEventListeners();
@@ -326,19 +324,19 @@ export class SolverVariablesPage extends HTMLElement {
                 console.log(
                   `SolverVariablesPage: API response indicates multiple solutions, type ${equation_type}, navigating to solutions page`,
                 );
-                Router.go("/solver/solutions");
+                Router.go("/solver/results");
               } else {
                 console.log(
                   `SolverVariablesPage: API response indicates single solution or no solution, navigating to sweeper page`,
                 );
 
                 if (is_const) {
-                  Router.go("/solver/perform_sweep");
+                  Router.go("/solver/results");
                   console.log(
                     "SolverVariablesPage: API response indicates constant equation, navigating to perform sweep page",
                   );
                 } else if (is_one_var || is_multi_var) {
-                  Router.go("/solver/sweeper");
+                  Router.go("/solver/results");
                   console.log(
                     "SolverVariablesPage: API response indicates one or multiple variable equation with single solution, navigating to sweeper page",
                   );

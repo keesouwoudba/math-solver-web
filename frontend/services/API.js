@@ -490,7 +490,7 @@ class API {
       );
     }
     if (steps < 2) {
-      return this.#makePerformSweepError("steps must be at least 2");
+      return thithis.root.removeEventListener("click"); //focusin, focusout, inputs.#makePerformSweepError("steps must be at least 2");
     }
     if (start >= end) {
       return this.#makePerformSweepError("start must be less than end");

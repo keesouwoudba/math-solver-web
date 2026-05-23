@@ -7,9 +7,7 @@ import UiPopup from "../UiPopup/UiPopup.js";
 import Utilities from "./Utilities.js";
 import Handlers from "./Handlers.js";
 
-//tocreate:
-//for calling api on solve, first check if fomula is the same and jsondata has that data. dont even call api if already there is jsonSolverHomePageData
-
+// TODO: Guard against duplicate shadow-root content if this component reconnects or re-renders.
 export class SolverHomePage extends HTMLElement {
   app = window.app || {};
 
@@ -237,6 +235,9 @@ export class SolverHomePage extends HTMLElement {
       "SolverHomePage: disconnectedCallback called, updating screen context",
     );
     this.updateScreenContext();
+    this.root.removeEventListener("input");
+    this.root.removeEventListener("focusin");
+    this.root.removeEventListener("focusout");
   }
 
   //impure instance utilities
@@ -350,6 +351,7 @@ export class SolverHomePage extends HTMLElement {
     );
   }
 
+  //all of them
   attachEventListeners() {
     // Add event listeners for tab switching
     const buttons = this.root.querySelectorAll(".btn-switcher");
@@ -376,6 +378,17 @@ export class SolverHomePage extends HTMLElement {
             : this.inputStateRef.isFocused,
         );
       });
+      //add event listeners for textarea input to track selection and caret position changes
+      const syncCaretFromTextarea = () => {
+        if (!textarea) return;
+        const start = textarea.selectionStart ?? 0;
+        const end = textarea.selectionEnd ?? start;
+        this.setSelectionRange(start, end);
+        this.setFocusState(textarea.matches(":focus"));
+      };
+      textarea.addEventListener("keyup", syncCaretFromTextarea);
+      textarea.addEventListener("mouseup", syncCaretFromTextarea);
+      textarea.addEventListener("select", syncCaretFromTextarea);
     }
 
     // delegated input handler survives DOM node replacement after patching, but anyway i want to edit it not to replace full element, but just value
@@ -418,13 +431,19 @@ export class SolverHomePage extends HTMLElement {
       backspaceBtn.addEventListener("click", () => {
         this.MyVDOMService.takeSnapshot();
 
-        const value = this.inputStateRef.current ?? "";
-        const start = this.inputStateRef.selectionStart ?? value.length;
-        const end = this.inputStateRef.selectionEnd ?? start;
-        const s = Math.min(start, end);
-        const e = Math.max(start, end);
+        const liveValue = textarea?.value ?? this.inputStateRef.current ?? "";
+        const liveStart =
+          textarea?.selectionStart ??
+          this.inputStateRef.selectionStart ??
+          liveValue.length;
+        const liveEnd =
+          textarea?.selectionEnd ??
+          this.inputStateRef.selectionEnd ??
+          liveStart;
+        const s = Math.min(liveStart, liveEnd);
+        const e = Math.max(liveStart, liveEnd);
 
-        const result = Handlers.backspaceButtonHandler(value, s, e);
+        const result = Handlers.backspaceButtonHandler(liveValue, s, e);
         this.applyInputState(result);
 
         console.log(

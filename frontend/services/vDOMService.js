@@ -73,6 +73,9 @@ export default class VDOMService {
       id: oldId,
       className: oldClassName,
       placeholder: oldPlaceholder,
+      textContent: oldTextContent,
+      href: oldHref,
+      title: oldTitle,
       stateRef: oldStateRef,
       children: oldChildren,
     } = oldNode || {};
@@ -81,6 +84,9 @@ export default class VDOMService {
       id: newId,
       className: newClassName,
       placeholder: newPlaceholder,
+      textContent: newTextContent,
+      href: newHref,
+      title: newTitle,
       stateRef: newStateRef,
       children: newChildren,
     } = nextNode || {};
@@ -147,27 +153,56 @@ export default class VDOMService {
 
       const oldValue = oldStateRef?.current ?? (oldNode && oldNode.value);
       const newValue = newStateRef?.current ?? (nextNode && nextNode.value);
+      const oldText =
+        oldTextContent !== undefined
+          ? oldTextContent
+          : (oldStateRef?.current ?? (oldNode && oldNode.value));
+      const newText =
+        newTextContent !== undefined
+          ? newTextContent
+          : (newStateRef?.current ?? (nextNode && nextNode.value));
 
       //
+      if (
+        oldValue !== newValue &&
+        (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement)
+      ) {
+        el.value = newValue ?? "";
+      }
 
-      if (oldValue !== newValue) {
-        if (
-          el instanceof HTMLInputElement ||
-          el instanceof HTMLTextAreaElement
-        ) {
-          el.value = newValue ?? "";
-        } else {
-          el.textContent = String(newValue ?? "");
-        }
+      if (
+        oldText !== newText &&
+        !(
+          el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement
+        ) &&
+        (!Array.isArray(newChildren) || newChildren.length === 0)
+      ) {
+        el.textContent = String(newText ?? "");
       }
 
       if (oldPlaceholder !== newPlaceholder && "placeholder" in el) {
         el.placeholder = newPlaceholder ?? "";
       }
 
+      if (oldHref !== newHref && "href" in el) {
+        if (newHref === undefined || newHref === null) {
+          el.removeAttribute("href");
+        } else {
+          el.setAttribute("href", newHref);
+        }
+      }
+
+      if (oldTitle !== newTitle) {
+        if (newTitle === undefined || newTitle === null) {
+          el.removeAttribute("title");
+        } else {
+          el.setAttribute("title", newTitle);
+        }
+      }
+
       applyFocusState(el, newStateRef);
 
-      // it works only if the position of children is not changed, but still they are fully replaced
+      // it works only if the position of children is not changed, but still they are fully replaced,
       if (Array.isArray(oldChildren) || Array.isArray(newChildren)) {
         const oc = Array.isArray(oldChildren) ? oldChildren : [];
         const nc = Array.isArray(newChildren) ? newChildren : [];
@@ -250,9 +285,12 @@ export default class VDOMService {
         tag,
         className,
         value,
+        textContent,
         stateRef,
         placeholder,
         datatarget,
+        href,
+        title,
         id,
         children,
         ["data-target"]: dataTargetAttr,
@@ -266,11 +304,26 @@ export default class VDOMService {
       if (nodeValue !== undefined) {
         el.value = nodeValue;
       }
-      if (nodeValue !== undefined && (tag === "button" || tag === "label")) {
-        el.textContent = nodeValue;
+      const nodeText =
+        textContent !== undefined
+          ? textContent
+          : tag === "button" || tag === "label"
+            ? nodeValue
+            : undefined;
+      if (
+        nodeText !== undefined &&
+        (!Array.isArray(children) || children.length === 0)
+      ) {
+        el.textContent = String(nodeText);
       }
       if (placeholder !== undefined) {
         el.placeholder = placeholder;
+      }
+      if (href !== undefined) {
+        el.setAttribute("href", href);
+      }
+      if (title !== undefined) {
+        el.setAttribute("title", title);
       }
       const dataTarget = datatarget ?? dataTargetAttr;
       if (dataTarget !== undefined) {

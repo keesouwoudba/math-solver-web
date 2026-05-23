@@ -1,3 +1,4 @@
+// TODO: Guard against duplicate shadow-root content if this component reconnects.
 export default class UiPopup extends HTMLElement {
   MyPopupService;
   constructor() {
