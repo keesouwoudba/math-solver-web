@@ -322,24 +322,24 @@ export class SolverVariablesPage extends HTMLElement {
               this.updateScreenContext();
               if (needs_choice) {
                 console.log(
-                  `SolverVariablesPage: API response indicates multiple solutions, type ${equation_type}, navigating to solutions page`,
+                  `SolverVariablesPage: API response indicates multiple solutions, type ${equation_type}, navigating to results`,
                 );
                 Router.go("/solver/results");
               } else {
                 console.log(
-                  `SolverVariablesPage: API response indicates single solution or no solution, navigating to sweeper page`,
+                  `SolverVariablesPage: API response indicates single solution or no solution, navigating to results`,
                 );
 
                 if (is_const) {
-                  Router.go("/solver/results");
                   console.log(
-                    "SolverVariablesPage: API response indicates constant equation, navigating to perform sweep page",
+                    "SolverVariablesPage: API response indicates constant equation, navigating to results page",
                   );
+                  Router.go("/solver/results");
                 } else if (is_one_var || is_multi_var) {
-                  Router.go("/solver/results");
                   console.log(
-                    "SolverVariablesPage: API response indicates one or multiple variable equation with single solution, navigating to sweeper page",
+                    "SolverVariablesPage: API response indicates one or multiple variable equation with single solution, navigating to results page",
                   );
+                  Router.go("/solver/results");
                 } else {
                   console.warn(
                     `SolverVariablesPage: API response indicates unexpected case (not const, not one var, not multi var) ${error}`,

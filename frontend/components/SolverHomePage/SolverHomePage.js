@@ -15,6 +15,7 @@ export class SolverHomePage extends HTMLElement {
   screenContextService = ScreenContextService.getInstance(); //object starts with lowercase
   MyVDOMService;
   MyPopupService;
+  eventAbortController;
 
   //data
   data;
@@ -235,9 +236,10 @@ export class SolverHomePage extends HTMLElement {
       "SolverHomePage: disconnectedCallback called, updating screen context",
     );
     this.updateScreenContext();
-    this.root.removeEventListener("input");
-    this.root.removeEventListener("focusin");
-    this.root.removeEventListener("focusout");
+    if (this.eventAbortController) {
+      this.eventAbortController.abort();
+      this.eventAbortController = null;
+    }
   }
 
   //impure instance utilities
@@ -353,31 +355,49 @@ export class SolverHomePage extends HTMLElement {
 
   //all of them
   attachEventListeners() {
+    if (this.eventAbortController) {
+      this.eventAbortController.abort();
+    }
+    this.eventAbortController = new AbortController();
+    const { signal } = this.eventAbortController;
+
     // Add event listeners for tab switching
     const buttons = this.root.querySelectorAll(".btn-switcher");
     const panels = this.root.querySelectorAll(".keypad-grid");
     buttons.forEach((btn) => {
-      btn.addEventListener("click", (event) => {
-        const targetPanel = this.root.querySelector(`#${btn.dataset.target}`);
-        Handlers.tabSwitchHandler(buttons, panels, btn, targetPanel);
-      });
+      btn.addEventListener(
+        "click",
+        (event) => {
+          const targetPanel = this.root.querySelector(`#${btn.dataset.target}`);
+          Handlers.tabSwitchHandler(buttons, panels, btn, targetPanel);
+        },
+        { signal },
+      );
     });
 
     //add event listeners for textarea input focusin and focusout to track focus state
     const textarea = this.root.querySelector("#formula-input");
     if (textarea) {
-      this.root.addEventListener("focusin", (event) => {
-        this.setFocusState(
-          Handlers.focusinHandler(event) || this.inputStateRef.isFocused,
-        );
-      });
-      this.root.addEventListener("focusout", (event) => {
-        this.setFocusState(
-          Handlers.focusoutHandler(event)
-            ? false
-            : this.inputStateRef.isFocused,
-        );
-      });
+      this.root.addEventListener(
+        "focusin",
+        (event) => {
+          this.setFocusState(
+            Handlers.focusinHandler(event) || this.inputStateRef.isFocused,
+          );
+        },
+        { signal },
+      );
+      this.root.addEventListener(
+        "focusout",
+        (event) => {
+          this.setFocusState(
+            Handlers.focusoutHandler(event)
+              ? false
+              : this.inputStateRef.isFocused,
+          );
+        },
+        { signal },
+      );
       //add event listeners for textarea input to track selection and caret position changes
       const syncCaretFromTextarea = () => {
         if (!textarea) return;
@@ -386,175 +406,198 @@ export class SolverHomePage extends HTMLElement {
         this.setSelectionRange(start, end);
         this.setFocusState(textarea.matches(":focus"));
       };
-      textarea.addEventListener("keyup", syncCaretFromTextarea);
-      textarea.addEventListener("mouseup", syncCaretFromTextarea);
-      textarea.addEventListener("select", syncCaretFromTextarea);
+      textarea.addEventListener("keyup", syncCaretFromTextarea, { signal });
+      textarea.addEventListener("mouseup", syncCaretFromTextarea, { signal });
+      textarea.addEventListener("select", syncCaretFromTextarea, { signal });
     }
 
     // delegated input handler survives DOM node replacement after patching, but anyway i want to edit it not to replace full element, but just value
-    this.root.addEventListener("input", (event) => {
-      const result = Handlers.inputChangeHandler(event);
-      if (!result) return;
-      this.MyVDOMService.takeSnapshot();
-      //mutate the data
-      this.applyInputState(result);
-      console.log(
-        `SolverHomePage: User input updated to "${this.inputStateRef.current}"`,
-      );
-      this.MyVDOMService.updateDOM("from user input change");
-      this.updateScreenContext();
-    });
+    this.root.addEventListener(
+      "input",
+      (event) => {
+        const result = Handlers.inputChangeHandler(event);
+        if (!result) return;
+        this.MyVDOMService.takeSnapshot();
+        //mutate the data
+        this.applyInputState(result);
+        console.log(
+          `SolverHomePage: User input updated to "${this.inputStateRef.current}"`,
+        );
+        this.MyVDOMService.updateDOM("from user input change");
+        this.updateScreenContext();
+      },
+      { signal },
+    );
 
     //add event listener for clear button
     const clearBtn = this.root.querySelector("#btn-clear");
     if (clearBtn) {
-      clearBtn.addEventListener("click", () => {
-        this.MyVDOMService.takeSnapshot();
+      clearBtn.addEventListener(
+        "click",
+        () => {
+          this.MyVDOMService.takeSnapshot();
 
-        //clear input and save cursor position
-        this.applyInputState({
-          current: "",
-          selectionStart: 0,
-          selectionEnd: 0,
-          isFocused: false,
-        });
+          //clear input and save cursor position
+          this.applyInputState({
+            current: "",
+            selectionStart: 0,
+            selectionEnd: 0,
+            isFocused: false,
+          });
 
-        console.log(`SolverHomePage: Clear button clicked, user input cleared`);
-        this.MyVDOMService.updateDOM("from clear button click");
-        this.updateScreenContext();
-      });
+          console.log(
+            `SolverHomePage: Clear button clicked, user input cleared`,
+          );
+          this.MyVDOMService.updateDOM("from clear button click");
+          this.updateScreenContext();
+        },
+        { signal },
+      );
     }
 
     //add event listener for backspace button
     const backspaceBtn = this.root.querySelector("#btn-backspace");
     if (backspaceBtn) {
-      backspaceBtn.addEventListener("click", () => {
-        this.MyVDOMService.takeSnapshot();
+      backspaceBtn.addEventListener(
+        "click",
+        () => {
+          this.MyVDOMService.takeSnapshot();
 
-        const liveValue = textarea?.value ?? this.inputStateRef.current ?? "";
-        const liveStart =
-          textarea?.selectionStart ??
-          this.inputStateRef.selectionStart ??
-          liveValue.length;
-        const liveEnd =
-          textarea?.selectionEnd ??
-          this.inputStateRef.selectionEnd ??
-          liveStart;
-        const s = Math.min(liveStart, liveEnd);
-        const e = Math.max(liveStart, liveEnd);
+          const liveValue = textarea?.value ?? this.inputStateRef.current ?? "";
+          const liveStart =
+            textarea?.selectionStart ??
+            this.inputStateRef.selectionStart ??
+            liveValue.length;
+          const liveEnd =
+            textarea?.selectionEnd ??
+            this.inputStateRef.selectionEnd ??
+            liveStart;
+          const s = Math.min(liveStart, liveEnd);
+          const e = Math.max(liveStart, liveEnd);
 
-        const result = Handlers.backspaceButtonHandler(liveValue, s, e);
-        this.applyInputState(result);
+          const result = Handlers.backspaceButtonHandler(liveValue, s, e);
+          this.applyInputState(result);
 
-        console.log(
-          `SolverHomePage: Backspace button clicked, user input updated to "${this.inputStateRef.current}"`,
-        );
-        this.MyVDOMService.updateDOM("from backspace button click");
-        this.updateScreenContext();
-      });
+          console.log(
+            `SolverHomePage: Backspace button clicked, user input updated to "${this.inputStateRef.current}"`,
+          );
+          this.MyVDOMService.updateDOM("from backspace button click");
+          this.updateScreenContext();
+        },
+        { signal },
+      );
     }
 
     //add event listeners for operator and function buttons
     const operatorAndFunctionButtons =
       this.root.querySelectorAll(".button-white");
     operatorAndFunctionButtons.forEach((btn) => {
-      btn.addEventListener("click", (event) => {
-        this.MyVDOMService.takeSnapshot();
-        const textarea = this.root.querySelector("#formula-input"); //pass textarea as arg
+      btn.addEventListener(
+        "click",
+        (event) => {
+          this.MyVDOMService.takeSnapshot();
+          const textarea = this.root.querySelector("#formula-input"); //pass textarea as arg
 
-        const result = Utilities.saveCaretPositions(event, textarea);
-        if (!result.status) {
-          return;
-        }
-        const { valueToInsert, id } = result;
-        this.applyInputState(result);
+          const result = Utilities.saveCaretPositions(event, textarea);
+          if (!result.status) {
+            return;
+          }
+          const { valueToInsert, id } = result;
+          this.applyInputState(result);
 
-        if (id.startsWith("operator-")) {
-          //operator handler function: receives: this.data.inputStateRef returns: {status, current, selectionStart, selectionEnd, isFocused=true}
-          //move cursor to the end of inserted operator for default
-          const result = Handlers.operatorButtonHandler(
-            this.data.inputStateRef,
-            valueToInsert,
-            id,
+          if (id.startsWith("operator-")) {
+            //operator handler function: receives: this.data.inputStateRef returns: {status, current, selectionStart, selectionEnd, isFocused=true}
+            //move cursor to the end of inserted operator for default
+            const result = Handlers.operatorButtonHandler(
+              this.data.inputStateRef,
+              valueToInsert,
+              id,
+            );
+            this.applyInputState(result);
+          } else if (id.startsWith("function-")) {
+            //check with regex if * is needed to insert
+            const result = Handlers.functionButtonHandler(
+              this.data.inputStateRef,
+              valueToInsert,
+              id,
+            );
+            this.applyInputState(result);
+          }
+          this.MyVDOMService.updateDOM(
+            `from operator/function button click, id: ${id}`,
           );
-          this.applyInputState(result);
-        } else if (id.startsWith("function-")) {
-          //check with regex if * is needed to insert
-          const result = Handlers.functionButtonHandler(
-            this.data.inputStateRef,
-            valueToInsert,
-            id,
-          );
-          this.applyInputState(result);
-        }
-        this.MyVDOMService.updateDOM(
-          `from operator/function button click, id: ${id}`,
-        );
-        this.updateScreenContext();
-      });
+          this.updateScreenContext();
+        },
+        { signal },
+      );
     });
 
     //add event listener for solve button
     const solveBtn = this.root.querySelector("#btn-solve");
     if (solveBtn) {
-      solveBtn.addEventListener("click", async () => {
-        //step1: validate user current input. (TODO: create a new helper validateSyntax like my python code in comments)
-        //step2: call api to set the formula
-        //step3: if validation is bad, show popup with the error mesage and real problem user had in syntax
+      solveBtn.addEventListener(
+        "click",
+        async () => {
+          //step1: validate user current input. (TODO: create a new helper validateSyntax like my python code in comments)
+          //step2: call api to set the formula
+          //step3: if validation is bad, show popup with the error mesage and real problem user had in syntax
 
-        //step1:
-        const [isValid, message] = Utilities.validateSyntax(
-          this.data.inputStateRef.current,
-        );
-
-        //step2:
-        if (isValid) {
-          const responseData = await API.setFormula({
-            formula_string: this.data.inputStateRef.current,
-          });
-          if (responseData.ok) {
-            console.log(`SolverHomePage: set formula response ok`);
-          } else {
-            console.error(
-              `SolverHomePage: set formula API call failed with status ${responseData.status}`,
-            );
-            this.MyPopupService.showErrorPopup(
-              `Failed to set formula. Server responded with status ${responseData.status}. Please try again.`,
-            );
-            return;
-          }
-          const jsonDataSolverHomePage = responseData.data;
-          if (jsonDataSolverHomePage) {
-            console.log(`SolverHomePage: Server response indicates success`);
-            // we are supposed to take the variables from the equation and move to the next page (for choosing the varibales)
-            this.jsonDataSolverHomePage = jsonDataSolverHomePage; //before this is was replacing all manual assignemnts with faca
-            const { variables, status_bool, valid, error, formula_string } =
-              jsonDataSolverHomePage;
-
-            if (status_bool && valid) {
-              this.data.popupState.message =
-                message ||
-                "formula is valid, moving to variable selection page";
-              this.updateScreenContext();
-              Router.go("/solver/variables");
-            } else {
-              //step 3
-              this.data.popupState.message = error || "unknown error";
-              this.updateScreenContext();
-              this.MyPopupService.showErrorPopup(
-                `Validation failed: ${error || "unknown error"}, formula string: ${formula_string || "not provided"}, variables parsed: ${variables ? variables.join(", ") : "not provided"}`,
-              );
-            }
-          }
-        } else {
-          //step 3
-          this.data.popupState.message = message || "unknown validation error";
-          this.updateScreenContext();
-          this.MyPopupService.showErrorPopup(
-            `Validation failed: ${this.data.popupState.message}`,
+          //step1:
+          const [isValid, message] = Utilities.validateSyntax(
+            this.data.inputStateRef.current,
           );
-        }
-      });
+
+          //step2:
+          if (isValid) {
+            const responseData = await API.setFormula({
+              formula_string: this.data.inputStateRef.current,
+            });
+            if (responseData.ok) {
+              console.log(`SolverHomePage: set formula response ok`);
+            } else {
+              console.error(
+                `SolverHomePage: set formula API call failed with status ${responseData.status}`,
+              );
+              this.MyPopupService.showErrorPopup(
+                `Failed to set formula. Server responded with status ${responseData.status}. Please try again.`,
+              );
+              return;
+            }
+            const jsonDataSolverHomePage = responseData.data;
+            if (jsonDataSolverHomePage) {
+              console.log(`SolverHomePage: Server response indicates success`);
+              // we are supposed to take the variables from the equation and move to the next page (for choosing the varibales)
+              this.jsonDataSolverHomePage = jsonDataSolverHomePage; //before this is was replacing all manual assignemnts with faca
+              const { variables, status_bool, valid, error, formula_string } =
+                jsonDataSolverHomePage;
+
+              if (status_bool && valid) {
+                this.data.popupState.message =
+                  message ||
+                  "formula is valid, moving to variable selection page";
+                this.updateScreenContext();
+                Router.go("/solver/variables");
+              } else {
+                //step 3
+                this.data.popupState.message = error || "unknown error";
+                this.updateScreenContext();
+                this.MyPopupService.showErrorPopup(
+                  `Validation failed: ${error || "unknown error"}, formula string: ${formula_string || "not provided"}, variables parsed: ${variables ? variables.join(", ") : "not provided"}`,
+                );
+              }
+            }
+          } else {
+            //step 3
+            this.data.popupState.message =
+              message || "unknown validation error";
+            this.updateScreenContext();
+            this.MyPopupService.showErrorPopup(
+              `Validation failed: ${this.data.popupState.message}`,
+            );
+          }
+        },
+        { signal },
+      );
     }
   }
 }

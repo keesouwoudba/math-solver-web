@@ -565,7 +565,6 @@ class FormulaSolver:
     def from_dict(cls, data: dict) -> 'FormulaSolver':
         """
         Creates a new FormulaSolver instance from a saved dictionary
-        Use this after loading from Redis
         """
         # Create new empty solver
         solver = cls()

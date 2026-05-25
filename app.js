@@ -10,6 +10,7 @@ import ScreenContextService from "/frontend/services/ScreenContextService.js";
 import { MainPage } from "/frontend/components/MainPage/MainPage.js";
 import { SolverHomePage } from "/frontend/components/SolverHomePage/SolverHomePage.js";
 import { SolverVariablesPage } from "/frontend/components/SolverVariablesPage/SolverVariablesPage.js";
+import { SolverEquationResultsPage } from "/frontend/components/SolverEquationResultPage/SolverEquationResultsPage.js";
 
 window.app = {};
 window.app.router = Router;

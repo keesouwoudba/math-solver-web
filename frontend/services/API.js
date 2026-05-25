@@ -36,7 +36,7 @@ class API {
     "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/wcAAgMBApG3xQAAAABJRU5ErkJggg==";
 
   static #baseUrl = "http://127.0.0.1:5000";
-  static #useExamples = true;
+  static #useExamples = false;
 
   // === chahce service object ==
   static cacheingService = new ChacheingService();
@@ -584,42 +584,42 @@ class API {
   }
 
   static #realSetFormula(formula_string) {
-    return this.#requestJson("/set_formula", {
+    return this.#requestJson("/api/set_formula", {
       method: "POST",
       body: { formula_string },
     });
   }
 
   static #realSolveForTarget(target) {
-    return this.#requestJson("/solve_for_target", {
+    return this.#requestJson("/api/solve_for_target", {
       method: "POST",
       body: { target },
     });
   }
 
   static #realChooseSolution(index) {
-    return this.#requestJson("/choose_solution", {
+    return this.#requestJson("/api/choose_solution", {
       method: "POST",
       body: { index },
     });
   }
 
   static #realPassSweeper(sweeper) {
-    return this.#requestJson("/pass_sweeper", {
+    return this.#requestJson("/api/pass_sweeper", {
       method: "POST",
       body: { sweeper },
     });
   }
 
   static #realVerifyFixed(fixed) {
-    return this.#requestJson("/verify_fixed", {
+    return this.#requestJson("/api/verify_fixed", {
       method: "POST",
       body: { fixed },
     });
   }
 
   static #realPerformSweep({ start, end, steps }) {
-    return this.#requestBlob("/perform_sweep", {
+    return this.#requestBlob("/api/perform_sweep", {
       body: { start, end, steps },
     });
   }
@@ -628,7 +628,6 @@ class API {
   static status() {
     return this.#useExamples ? this.#exampleStatus() : this.#realStatus();
   }
-
   static setFormula(requestObject) {
     const { formula_string: formula_string } = requestObject || {};
     const cacheResponse =

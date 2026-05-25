@@ -18,7 +18,7 @@ export class SolverEquationResultsPage extends HTMLElement {
   jsonDataSolverVariablesPage;
 
   //dom and state references
-  prevDOM;
+  prevVDOM;
   vDOM;
   elems;
 
@@ -32,7 +32,6 @@ export class SolverEquationResultsPage extends HTMLElement {
           tag: "a",
           className: "breadcrumb-item",
           id: "breadcrumb-home",
-          href: "/",
           children: [
             {
               tag: "span",
@@ -179,8 +178,11 @@ export class SolverEquationResultsPage extends HTMLElement {
   }
   connectedCallback() {
     console.log("SolverEquationResultsPage: connectedCallback called");
-    this.MyVDOMService.updateDOM();
-    this.setEquations();
+    this.MyVDOMService.updateDOM("connectedCallback initial render");
+    this.MyVDOMService.takeSnapshot(); //take snapshot before patches
+    this.setEquations(); //set the original equation and solution to currentVdom
+    this.updateScreenContext();
+    this.MyVDOMService.updateDOM("connectedCallback render after adding data");
     this.attachEventListeners();
   }
   disconnectedCallback() {
@@ -210,7 +212,7 @@ export class SolverEquationResultsPage extends HTMLElement {
       this.vDOM = VDOMService.createVDOM(this.dynamicVDOM);
       this.data = {
         vDOM: this.vDOM,
-        prevDOM: this.prevDOM,
+        prevVDOM: this.prevVDOM,
         elems: this.elems,
         dynamicVDOM: this.dynamicVDOM,
         onlySusceptible: true,
@@ -254,15 +256,17 @@ export class SolverEquationResultsPage extends HTMLElement {
     const solverEquationResultsPageContext =
       this.screenContextService.getSolverEquationResultsPageContext() || {};
     //destructure data and json from context
-    ({
-      data: this.data,
-      jsonDataSolverEquationResultsPage: this.jsonDataSolverEquationResultsPage,
-    } = solverEquationResultsPageContext);
+    ({ data: this.data, json: this.jsonDataSolverEquationResultsPage } =
+      solverEquationResultsPageContext); //should have been just json
 
     const solverEquationResultsPageData =
       solverEquationResultsPageContext.data || {};
-    ({ vDOM: this.vDOM, prevDOM: this.prevDOM } =
+    ({ vDOM: this.vDOM, prevVDOM: this.prevVDOM } =
       solverEquationResultsPageData);
+
+    const solverVariablesPageContext =
+      this.screenContextService.getSolverVariablesPageContext() || {};
+    ({ json: this.jsonDataSolverVariablesPage } = solverVariablesPageContext);
 
     this.elems = undefined; //to be recreated by VDOMService
     this.data.elems = this.elems; //just in case
@@ -281,10 +285,8 @@ export class SolverEquationResultsPage extends HTMLElement {
     const originalEquation =
       this.jsonDataSolverVariablesPage?.formula_string || "";
     this.setOriginalFormulation(originalEquation);
-
     const solutions = this.jsonDataSolverVariablesPage?.solutions || [];
     this.setSolutions(solutions);
-    this.MyVDOMService.updateDOM("setEquations");
   }
 
   setOriginalFormulation(equation) {
@@ -299,13 +301,14 @@ export class SolverEquationResultsPage extends HTMLElement {
     const solutionsGridNode = this.data.vDOM[2].children[1];
     //clear previous solutions
     solutionsGridNode.children = [];
+    const target = this.jsonDataSolverVariablesPage?.target || "Solution";
     //add new solutions
     solutions.forEach((solution, index) => {
       solutionsGridNode.children.push({
         tag: "div",
         className: "solution-item",
         id: `solution-${index}`,
-        textContent: solution,
+        textContent: `${target}${index + 1} = ${solution}`,
       });
     });
     console.log(
@@ -316,3 +319,8 @@ export class SolverEquationResultsPage extends HTMLElement {
   //event listeners, to be implemented as needed
   attachEventListeners() {}
 }
+
+customElements.define(
+  "solver-equation-results-page",
+  SolverEquationResultsPage,
+);

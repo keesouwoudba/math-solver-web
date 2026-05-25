@@ -23,7 +23,9 @@ export default class VDOMService {
       this.data.elems = this.data.vDOM.map(this.convertNode);
       this.realDOM.append(...this.data.elems);
     } else {
-      console.log("updateDOM: else block in");
+      console.log(
+        `VDOMService: Updating DOM for traceback: ${traceback}, with vDOM: ${this.data.vDOM} and prevVDOM: ${this.data.prevVDOM}`,
+      );
       const patches = this.diff(this.data.prevVDOM, this.data.vDOM);
       console.log(`VDOMService: ${traceback} Patches to apply: `, patches);
       this.data.elems = this.patch(this.data.elems, patches);
@@ -33,6 +35,9 @@ export default class VDOMService {
   diff(prevVDOM, newVDOM) {
     const patches = [];
     if (this.data.onlySusceptible) {
+      console.log(
+        `VDOMService: Diffing only susceptible indexes: ${this.data.susceptibleIndexes}, for prev: ${JSON.stringify(prevVDOM)}, new: ${JSON.stringify(newVDOM)}`,
+      );
       this.data.susceptibleIndexes.forEach((i) => {
         if (JSON.stringify(prevVDOM[i]) !== JSON.stringify(newVDOM[i])) {
           patches.push({
