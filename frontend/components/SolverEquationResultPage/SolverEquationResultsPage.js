@@ -286,14 +286,14 @@ export class SolverEquationResultsPage extends HTMLElement {
     const originalEquationNode = this.data.vDOM[1].children[1].children[0];
     originalEquationNode.textContent = equation;
     //append copy button with the value for container
-    this.data.vDOM[1].children[1].children.push({
+    this.data.vDOM[1].children[1].children[1] = {
       tag: "button",
       className: "copy-button",
       id: "copy-original-equation-button",
       title: "Copy",
       value: equation,
       textContent: "📋",
-    });
+    };
     console.log(
       `SolverEquationResultsPage: Original formulation set in VDOM: ${equation}`,
     );
@@ -336,6 +336,7 @@ export class SolverEquationResultsPage extends HTMLElement {
 
   //event listeners, to be implemented as needed
   attachEventListeners() {
+    //plan:
     //1. event listener for home btn in breadcrumb
     //2. event listener for all copy equation btns
     //3. event listener for sweep/plot button
@@ -422,6 +423,22 @@ export class SolverEquationResultsPage extends HTMLElement {
 
     //5. event listener for save calculation button
     //let me think about how can we save it. maybe some local browser storage apis, to store all the screencontexts as json
+    //i will do it later. for now no need state
+    const saveBtn = this.root.querySelector("#save-calculation-button");
+    if (saveBtn) {
+      saveBtn.addEventListener("click", () => {
+        this.MyPopupService.showDefaultPopup("Save functionality coming soon!");
+      });
+    }
+
+    //6. event listener for back to editor button
+    const backButton = this.root.querySelector("#back-button");
+    if (backButton) {
+      backButton.addEventListener("click", () => {
+        this.updateScreenContext();
+        Router.go("/solver");
+      });
+    }
   }
 }
 

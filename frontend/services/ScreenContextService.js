@@ -16,6 +16,11 @@ export default class ScreenContextService {
   jsonDataSolverEquationResultsPage;
   solverEquationResultsPageHasContext;
 
+  //solverSolutionsChoicePage
+  SolverSolutionsChoicePageData;
+  jsonDataSolverSolutionsChoicePage;
+  solverSolutionsChoicePageHasContext;
+
   constructor() {
     console.log("ScreenContextService: Initializing service");
     window.app.ScreenContextService = this;
@@ -88,6 +93,27 @@ export default class ScreenContextService {
     return {
       data: this.SolverEquationResultsPageData,
       json: this.jsonDataSolverEquationResultsPage,
+    };
+  }
+
+  setSolverSolutionsChoicePageContext(data, json, hasContext = true) {
+    console.log(
+      "ScreenContextService: Setting SolverSolutionsChoicePage data and JSON",
+    );
+    this.SolverSolutionsChoicePageData = data;
+    this.jsonDataSolverSolutionsChoicePage = json;
+    this.solverSolutionsChoicePageHasContext = hasContext;
+    console.log(
+      "ScreenContextService: Data and JSON set for SolverSolutionsChoicePage",
+    );
+  }
+  getSolverSolutionsChoicePageContext() {
+    console.log(
+      "ScreenContextService: Getting SolverSolutionsChoicePage data and JSON",
+    );
+    return {
+      data: this.SolverSolutionsChoicePageData,
+      json: this.jsonDataSolverSolutionsChoicePage,
     };
   }
 

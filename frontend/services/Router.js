@@ -46,6 +46,10 @@ const Router = {
         console.log("Router: switch: /solver/results");
         pageElement = document.createElement("solver-equation-results-page");
         break;
+      case "/solver/solutions":
+        console.log("Router: switch: /solver/solutions");
+        pageElement = document.createElement("solver-solutions-choice-page");
+        break;
       default:
         console.log(`Router: switch: default for route ${route}`);
         pageElement = document.createElement("main-page");
