@@ -90,4 +90,21 @@ export default class ScreenContextService {
       json: this.jsonDataSolverEquationResultsPage,
     };
   }
+
+  resetScreenContext() {
+    console.log("ScreenContextService: Resetting all screen contexts");
+    this.SolverHomePageData = undefined;
+    this.jsonDataSolverHomePage = undefined;
+    this.solverHomePageHasContext = false;
+
+    this.SolverVariablesPageData = undefined;
+    this.jsonDataSolverVariablesPage = undefined;
+    this.solverVariablesPageHasContext = false;
+
+    this.SolverEquationResultsPageData = undefined;
+    this.jsonDataSolverEquationResultsPage = undefined;
+    this.solverEquationResultsPageHasContext = false;
+
+    console.log("ScreenContextService: All screen contexts reset");
+  }
 }

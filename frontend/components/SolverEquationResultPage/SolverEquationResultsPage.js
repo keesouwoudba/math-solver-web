@@ -29,7 +29,7 @@ export class SolverEquationResultsPage extends HTMLElement {
       id: "breadcrumb",
       children: [
         {
-          tag: "a",
+          tag: "button",
           className: "breadcrumb-item",
           id: "breadcrumb-home",
           children: [
@@ -70,13 +70,6 @@ export class SolverEquationResultsPage extends HTMLElement {
               className: "original-equation",
               id: "original-equation",
               textContent: "", //to be filled with the original equation from JSON
-            },
-            {
-              tag: "button",
-              className: "copy-button",
-              id: "copy-button",
-              title: "Copy",
-              textContent: "📋",
             },
           ],
         },
@@ -292,6 +285,15 @@ export class SolverEquationResultsPage extends HTMLElement {
   setOriginalFormulation(equation) {
     const originalEquationNode = this.data.vDOM[1].children[1].children[0];
     originalEquationNode.textContent = equation;
+    //append copy button with the value for container
+    this.data.vDOM[1].children[1].children.push({
+      tag: "button",
+      className: "copy-button",
+      id: "copy-original-equation-button",
+      title: "Copy",
+      value: equation,
+      textContent: "📋",
+    });
     console.log(
       `SolverEquationResultsPage: Original formulation set in VDOM: ${equation}`,
     );
@@ -304,11 +306,27 @@ export class SolverEquationResultsPage extends HTMLElement {
     const target = this.jsonDataSolverVariablesPage?.target || "Solution";
     //add new solutions
     solutions.forEach((solution, index) => {
+      const solutionText = `${target}${solutions.length > 1 ? index + 1 : ""} = ${solution}`;
       solutionsGridNode.children.push({
         tag: "div",
         className: "solution-item",
         id: `solution-${index}`,
-        textContent: `${target}${index + 1} = ${solution}`,
+        children: [
+          {
+            tag: "span",
+            className: "solution-text",
+            id: `solution-text-${index}`,
+            textContent: solutionText,
+          },
+          {
+            tag: "button",
+            className: "copy-button",
+            id: `copy-solution-button-${index}`,
+            title: "Copy",
+            textContent: "📋",
+            value: solutionText,
+          },
+        ],
       });
     });
     console.log(
@@ -317,7 +335,94 @@ export class SolverEquationResultsPage extends HTMLElement {
   }
 
   //event listeners, to be implemented as needed
-  attachEventListeners() {}
+  attachEventListeners() {
+    //1. event listener for home btn in breadcrumb
+    //2. event listener for all copy equation btns
+    //3. event listener for sweep/plot button
+    //4. event listener for new calculation button
+    //5. event listener for save calculation button
+    //6. event listener for back to editor button
+
+    //1. event listener for home btn in breadcrumb
+    const breadcrumbHomeBtn = this.root.querySelector("#breadcrumb-home");
+    if (breadcrumbHomeBtn) {
+      breadcrumbHomeBtn.addEventListener("click", () => {
+        this.updateScreenContext();
+        Router.go("/");
+      });
+    }
+
+    //2. event listener for all copy equation btns
+    this.root.addEventListener("click", (event) => {
+      if (event.target.classList.contains("copy-button")) {
+        const valueToCopy = event.target.value;
+        navigator.clipboard
+          .writeText(valueToCopy)
+          .then(() => {
+            this.MyPopupService.showDefaultPopup("Copied to clipboard!");
+          })
+          .catch((err) => {
+            console.error("Failed to copy: ", err);
+            this.MyPopupService.showErrorPopup("Failed to copy");
+          });
+      }
+    });
+
+    //3. event listener for sweep/plot button
+    const sweeperPromoButton = this.root.querySelector("#sweeper-promo-button");
+    if (sweeperPromoButton) {
+      sweeperPromoButton.addEventListener("click", () => {
+        this.updateScreenContext();
+        const { status_bool, error, needs_choice } =
+          this.jsonDataSolverVariablesPage || {};
+
+        if (!status_bool) {
+          console.warn(
+            `Cannot sweep/plot this equation. ${error || "Unknown error."}`,
+          );
+          this.MyPopupService.showErrorPopup(
+            `Cannot sweep/plot this equation. ${error || "Unknown error."}`,
+          );
+          return;
+        } else {
+          console.log(
+            "SolverEquationResultsPage: data exists, deciding the choice based on equation type ",
+          );
+          this.updateScreenContext();
+          if (needs_choice) {
+            console.log(
+              "SolverEquationResultsPage: needs user choice, navigating to SolverSolutionsChoicePage",
+            );
+            Router.go("/solver/solutions_choice");
+            return;
+          } else {
+            console.log(
+              "SolverEquationResultsPage: no user choice needed, navigating SolverSweeperConfigurationPage",
+            );
+            Router.go("/solver/sweeper_configuration");
+            return;
+          }
+          this.MyPopupService.showErrorPopup(
+            `Sweeping/Plotting not available for this equation type: ${equation_type}`,
+          );
+        }
+      });
+    }
+
+    //4. event listener for new calculation button
+    const newCalculationButton = this.root.querySelector(
+      "#new-calculation-button",
+    );
+    if (newCalculationButton) {
+      newCalculationButton.addEventListener("click", () => {
+        this.screenContextService.resetScreenContext(); //reset all screen contexts to clear data
+        Router.go("/solver");
+      });
+    }
+
+    //5. event listener for save calculation button
+    //let me think about how can we save it. maybe some local browser storage apis, to store all the screencontexts as json
+  }
 }
 
 customElements.define(

@@ -327,7 +327,7 @@ export class SolverVariablesPage extends HTMLElement {
                 Router.go("/solver/results");
               } else {
                 console.log(
-                  `SolverVariablesPage: API response indicates single solution or no solution, navigating to results`,
+                  `SolverVariablesPage: API response indicates single solution or no solution`,
                 );
 
                 if (is_const) {
@@ -335,11 +335,13 @@ export class SolverVariablesPage extends HTMLElement {
                     "SolverVariablesPage: API response indicates constant equation, navigating to results page",
                   );
                   Router.go("/solver/results");
+                  return;
                 } else if (is_one_var || is_multi_var) {
                   console.log(
                     "SolverVariablesPage: API response indicates one or multiple variable equation with single solution, navigating to results page",
                   );
                   Router.go("/solver/results");
+                  return;
                 } else {
                   console.warn(
                     `SolverVariablesPage: API response indicates unexpected case (not const, not one var, not multi var) ${error}`,
