@@ -12,6 +12,7 @@ import { SolverHomePage } from "/frontend/components/SolverHomePage/SolverHomePa
 import { SolverVariablesPage } from "/frontend/components/SolverVariablesPage/SolverVariablesPage.js";
 import { SolverEquationResultsPage } from "/frontend/components/SolverEquationResultPage/SolverEquationResultsPage.js";
 import { SolverSolutionsChoicePage } from "/frontend/components/SolverSolutionsChoicePage/SolverSolutionsChoicePage.js";
+import { SolverSweeperConfigurationPage } from "/frontend/components/SolverSweeperConfigurationPage/SolverSweeperConfigurationPage.js";
 
 window.app = {};
 window.app.router = Router;

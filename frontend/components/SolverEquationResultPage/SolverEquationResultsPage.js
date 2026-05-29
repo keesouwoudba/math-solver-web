@@ -394,7 +394,7 @@ export class SolverEquationResultsPage extends HTMLElement {
             console.log(
               "SolverEquationResultsPage: needs user choice, navigating to SolverSolutionsChoicePage",
             );
-            Router.go("/solver/solutions_choice");
+            Router.go("/solver/solutions");
             return;
           } else {
             console.log(

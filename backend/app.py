@@ -388,7 +388,7 @@ def choose_solution():
             "formula_string": "",
             "target": "", 
             "solutions": [], 
-            "needs_choice": False,  # ✅ Add
+            "needs_choice": False, 
             "is_const": False,
             "is_one_var": False,
             "is_multi_var": False,

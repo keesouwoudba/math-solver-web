@@ -115,6 +115,15 @@ export default class VDOMService {
             /* do nothing */
           }
         }
+      } else if (
+        targetEl instanceof HTMLSelectElement ||
+        targetEl instanceof HTMLInputElement
+      ) {
+        try {
+          targetEl.focus();
+        } catch (e) {
+          console.log(`VDOMService: Failed to focus element: `, e);
+        }
       } else {
         try {
           targetEl.focus();

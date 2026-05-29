@@ -17,15 +17,18 @@ export class SolverSolutionsChoicePage extends HTMLElement {
 
   //previous page (variables page, for taking solutions)
   jsonDataSolverVariablesPage;
+  jsonDataSolverSolutionsChoicePage;
 
   //dom and state references
   prevVDOM;
   vDOM;
   elems;
 
-  RadioGroupReference = {
+  radioGroupReference = {
     solution: "",
+    solutionIndex: null,
     isChosen: false,
+    //"solution_${index}": {isFocused: false}
   };
   // <template id="variable-option-template"> //each option for solution
   //     <div id="variable-option-container">
@@ -133,6 +136,10 @@ export class SolverSolutionsChoicePage extends HTMLElement {
     );
     this.attachEventListeners();
   }
+  disconnectedCallback() {
+    console.log(`SolverSolutionsChoicePage: disconnectedCallback called`);
+    this.updateScreenContext(); //update screen context before leaving the page to save the state
+  }
 
   loadCSS() {
     console.log(
@@ -163,6 +170,7 @@ export class SolverSolutionsChoicePage extends HTMLElement {
           isVisible: false,
           message: "",
         },
+        radioGroupReference: this.radioGroupReference,
         solutions: [],
         jsonDataSolverSolutionsChoicePage:
           this.jsonDataSolverSolutionsChoicePage,
@@ -239,8 +247,19 @@ export class SolverSolutionsChoicePage extends HTMLElement {
     }
   }
   addSolutionOptionsToVDOM() {
+    console.log(
+      `SolverSolutionsChoicePage: Adding solution options to VDOM based on JSON data`,
+    );
     const solutionsGroup = this.dynamicVDOM[2].children;
-    const solutionsOptions = this.jsonDataSolverSolutionsChoicePage?.solutions;
+    console.log(
+      `SolverSolutionsChoicePage: solutionsGroup reference obtained from dynamicVDOM`,
+      solutionsGroup,
+    );
+    const solutionsOptions = this.jsonDataSolverVariablesPage?.solutions;
+    console.log(
+      `SolverSolutionsChoicePage: solutionsOptions extracted from JSON data`,
+      solutionsOptions,
+    );
     if (solutionsOptions && solutionsOptions.length > 1) {
       solutionsOptions.forEach((solution, index) => {
         const optionVDOM = {
@@ -257,6 +276,9 @@ export class SolverSolutionsChoicePage extends HTMLElement {
                   className: "solution-input",
                   name: "solution",
                   value: index,
+                  stateRef: (this.radioGroupReference[`solution_${index}`] = {
+                    isFocused: false,
+                  }),
                 },
                 {
                   tag: "span",
@@ -268,6 +290,128 @@ export class SolverSolutionsChoicePage extends HTMLElement {
           ],
         };
         solutionsGroup.push(optionVDOM);
+      });
+    }
+  }
+  setChosenSolution(solution, index) {
+    this.data.radioGroupReference.solution = solution;
+    this.data.radioGroupReference.isChosen = true;
+    this.data.radioGroupReference.solutionIndex = index;
+    console.log(
+      `SolverSolutionsChoicePage: setChosenSolution called with solution ${solution}, radioGroupReference updated:`,
+      this.data.radioGroupReference,
+    );
+  }
+
+  attachEventListeners() {
+    //1. event listener for back button, go back to results page
+    //2. event listener for for solution options and keep updating radioGroupReference, in the same way it was done in variables page
+    //3. event listener for solve button (check if chosen first, if not show popup, if chosen go to sweeper_configuration)
+
+    //1. event listner for back button, go back to results page
+    const btnBack = this.root.querySelector("#btn-back");
+    if (btnBack) {
+      btnBack.addEventListener("click", () => {
+        this.updateScreenContext();
+        Router.go("/solver/results");
+      });
+    }
+
+    //2. event listener for for solution options and keep updating radioGroupReference, in the same way it was done in variables page
+    const solutionInputs = this.root.querySelectorAll(".solution-input");
+    solutionInputs.forEach((input, index) => {
+      input.addEventListener("change", (event) => {
+        const selectedSolution = event.target.value;
+        console.log(
+          `SolverSolutionsChoicePage: Solution option selected: ${selectedSolution}`,
+        );
+        this.setChosenSolution(selectedSolution, index);
+        console.log(
+          "SolverSolutionsChoicePage: Updated radioGroupReference in data:",
+          this.data.radioGroupReference,
+        );
+      });
+    });
+
+    //3. event listener for solve button (check if chosen first, if not show popup, if chosen go to sweeper_configuration)
+    const btnSolve = this.root.querySelector("#btn-solve");
+    if (btnSolve) {
+      btnSolve.addEventListener("click", async () => {
+        if (
+          !this.data.radioGroupReference.isChosen ||
+          this.data.radioGroupReference.solution == ""
+        ) {
+          this.MyPopupService.showErrorPopup(
+            "Please choose a solution to explore before proceeding.",
+          );
+        } else {
+          this.updateScreenContext();
+          //api request chooseSoltuion
+          try {
+            const responseData = await API.chooseSolution({
+              formula_string: this.jsonDataSolverVariablesPage.formula_string,
+              target: this.jsonDataSolverVariablesPage.target,
+              index: this.data.radioGroupReference.solutionIndex,
+            });
+            if (responseData.ok) {
+              console.log(
+                `SolverSolutionsChoicePage: Solution chosen successfull`,
+                responseData,
+              );
+            } else {
+              console.error(
+                "SolverSolutionsChoicePage: API call failed, response data:",
+                responseData,
+              );
+              this.MyPopupService.showErrorPopup(
+                "An error occurred while solving the equation. Please try again.",
+              );
+              return;
+            }
+            const jsonSolverSolutionsChoicePage = responseData.data;
+            if (jsonSolverSolutionsChoicePage) {
+              console.log(
+                `SolverSolutionsChoicePage: Retrieved solution data:`,
+                jsonSolverSolutionsChoicePage,
+              );
+              this.jsonDataSolverSolutionsChoicePage =
+                jsonSolverSolutionsChoicePage;
+              const { status_bool, index, solution, error } =
+                jsonSolverSolutionsChoicePage || {};
+              if (!status_bool) {
+                console.warn(
+                  `SolverSolutionsChoicePage: API response indicates failure, showing error ${error} popup`,
+                );
+                this.MyPopupService.showErrorPopup(
+                  `Failed to solve for variable "${target}". Server responded with an error "${error}". Please check your formula and try again.`,
+                );
+                this.updateScreenContext();
+                return;
+              } else {
+                console.log(
+                  `SolverSolutionsChoicePage: API response indicates success, solution index: ${index}, solution: ${solution}`,
+                );
+                this.updateScreenContext();
+                Router.go("/solver/sweeper_configuration");
+              }
+            } else {
+              console.error(
+                `SolverSolutionsChoicePage: No data received from API response, cannot proceed`,
+              );
+              this.MyPopupService.showErrorPopup(
+                "An error occurred while processing the solution. Please try again.",
+              );
+            }
+          } catch (e) {
+            console.error(
+              `SolverSolutionsChoicePage: Error in chooseSolution API request:`,
+              e,
+            );
+            this.MyPopupService.showErrorPopup(
+              "An error occurred while choosing the solution. Please try again.",
+            );
+          }
+        }
       });
     }
   }
