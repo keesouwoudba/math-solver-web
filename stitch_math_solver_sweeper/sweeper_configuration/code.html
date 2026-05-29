@@ -1,216 +1,161 @@
 <!DOCTYPE html>
+<html class="light" lang="en">
 
-<html class="light" lang="en"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>MathSolver - Sweeper Configuration</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Newsreader:wght@400&amp;family=Space+Grotesk:wght@500;600&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    "colors": {
-                        "primary-fixed": "#d4e3ff",
-                        "inverse-surface": "#2d3133",
-                        "on-tertiary-container": "#7ba7ff",
-                        "tertiary-fixed-dim": "#adc6ff",
-                        "surface": "#f7f9fb",
-                        "tertiary-fixed": "#d8e2ff",
-                        "secondary-fixed": "#6ffbbe",
-                        "on-primary": "#ffffff",
-                        "on-tertiary": "#ffffff",
-                        "primary": "#0f2846",
-                        "surface-container-low": "#f2f4f6",
-                        "inverse-on-surface": "#eff1f3",
-                        "surface-dim": "#d8dadc",
-                        "on-tertiary-fixed-variant": "#004395",
-                        "surface-container-highest": "#e0e3e5",
-                        "tertiary": "#002558",
-                        "surface-bright": "#f7f9fb",
-                        "background": "#f7f9fb",
-                        "primary-fixed-dim": "#b1c8ee",
-                        "on-primary-container": "#92a9ce",
-                        "inverse-primary": "#b1c8ee",
-                        "on-secondary-container": "#00714d",
-                        "error-container": "#ffdad6",
-                        "on-surface": "#191c1e",
-                        "on-surface-variant": "#44474e",
-                        "primary-container": "#273e5d",
-                        "error": "#ba1a1a",
-                        "on-error-container": "#93000a",
-                        "outline": "#74777e",
-                        "tertiary-container": "#003a82",
-                        "secondary-fixed-dim": "#4edea3",
-                        "on-primary-fixed": "#001c39",
-                        "on-secondary": "#ffffff",
-                        "on-secondary-fixed-variant": "#005236",
-                        "surface-tint": "#495f80",
-                        "surface-container-high": "#e6e8ea",
-                        "on-background": "#191c1e",
-                        "secondary": "#006c49",
-                        "on-error": "#ffffff",
-                        "on-secondary-fixed": "#002113",
-                        "surface-container": "#eceef0",
-                        "surface-container-lowest": "#ffffff",
-                        "on-primary-fixed-variant": "#314867",
-                        "outline-variant": "#c4c6ce",
-                        "on-tertiary-fixed": "#001a42",
-                        "secondary-container": "#6cf8bb",
-                        "surface-variant": "#e0e3e5"
-                    },
-                    "borderRadius": {
-                        "DEFAULT": "0.125rem",
-                        "lg": "0.25rem",
-                        "xl": "0.5rem",
-                        "full": "0.75rem"
-                    },
-                    "spacing": {
-                        "md": "1rem",
-                        "lg": "1.5rem",
-                        "xl": "2.5rem",
-                        "sm": "0.5rem",
-                        "base": "4px",
-                        "xs": "0.25rem",
-                        "container-margin": "clamp(1rem, 5vw, 2.5rem)",
-                        "grid-gutter": "1rem"
-                    },
-                    "fontFamily": {
-                        "keypad-label": ["Inter"],
-                        "label-caps": ["Inter"],
-                        "h2-ui": ["Space Grotesk"],
-                        "h1-ui": ["Space Grotesk"],
-                        "math-inline": ["Newsreader"],
-                        "body-main": ["Inter"],
-                        "display-math": ["Newsreader"]
-                    },
-                    "fontSize": {
-                        "keypad-label": ["1.25rem", { "lineHeight": "1", "fontWeight": "500" }],
-                        "label-caps": ["0.75rem", { "lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600" }],
-                        "h2-ui": ["1.5rem", { "lineHeight": "1.3", "fontWeight": "500" }],
-                        "h1-ui": ["2rem", { "lineHeight": "1.3", "fontWeight": "600" }],
-                        "math-inline": ["1.125rem", { "lineHeight": "1.5", "fontWeight": "400" }],
-                        "body-main": ["1rem", { "lineHeight": "1.5", "fontWeight": "400" }],
-                        "display-math": ["2.5rem", { "lineHeight": "1.2", "fontWeight": "400" }]
-                    }
-                }
-            }
-        }
-    </script>
-<style>
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        }
-    </style>
-<style>
-    body {
-      min-height: max(884px, 100dvh);
-    }
-  </style>
-  </head>
-<body class="bg-background text-on-background min-h-screen flex flex-col font-body-main text-body-main antialiased selection:bg-primary-container selection:text-on-primary-container">
-<!-- TopAppBar -->
-<header class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 font-['Space_Grotesk'] tracking-tight docked full-width top-0 border-b border-slate-200 dark:border-slate-800 flat no shadows flex justify-between items-center w-full px-6 py-4 max-w-7xl mx-auto z-50 sticky">
-<div class="flex items-center gap-3">
-<span aria-hidden="true" class="material-symbols-outlined text-primary" data-icon="function">function</span>
-<span class="text-xl font-bold text-slate-900 dark:text-white">MathSolver</span>
-</div>
-<button class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors px-4 py-2 rounded flex items-center gap-2">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>MathSolver - Sweeper Configuration</title>
+    <link rel="stylesheet" href="code.css">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Newsreader:wght@400&family=Space+Grotesk:wght@500;600&display=swap"
+        rel="stylesheet" />
+</head>
+
+<body class="body-main">
+    <!-- Top App Bar -->
+    <header class="top-app-bar">
+        <div class="app-bar-branding">
+            <span class="material-symbols-outlined icon" data-icon="function">function</span>
+            <span class="title">MathSolver</span>
+        </div>
+        <button class="help-button">
             Help
         </button>
-</header>
-<div class="flex flex-1 max-w-7xl mx-auto w-full relative">
-<!-- NavigationDrawer -->
-<nav class="bg-white dark:bg-slate-950 text-blue-600 dark:text-blue-400 font-['Space_Grotesk'] font-medium h-full w-64 border-r border-slate-200 dark:border-slate-800 shadow-xl dark:shadow-none hidden md:flex flex-col fixed left-0 top-0 h-screen z-40 pt-24 px-4 gap-2">
-<div class="px-4 py-2 text-sm text-slate-500 dark:text-slate-400 font-label-caps uppercase tracking-wider mb-2">Menu</div>
-<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors rounded-DEFAULT" href="#">
-<span class="material-symbols-outlined" data-icon="calculate">calculate</span>
+    </header>
+
+    <!-- Main Layout -->
+    <div class="layout-wrapper">
+        <!-- Navigation Drawer -->
+        <nav class="nav-drawer">
+            <div class="nav-drawer-menu-label">Menu</div>
+            <a href="#" class="nav-link">
+                <span class="material-symbols-outlined icon" data-icon="calculate">calculate</span>
                 Solver
             </a>
-<a class="flex items-center gap-3 px-4 py-3 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-lg Active: opacity-80 transition-all Active: scale-95 duration-150 rounded-DEFAULT" href="#">
-<span class="material-symbols-outlined" data-icon="cleaning_services">cleaning_services</span>
+            <a href="#" class="nav-link active">
+                <span class="material-symbols-outlined icon" data-icon="cleaning_services">cleaning_services</span>
                 Sweeper
             </a>
-</nav>
-<!-- Main Content Area -->
-<main class="flex-1 md:ml-64 w-full p-container-margin md:p-xl flex justify-center items-start">
-<div class="w-full max-w-3xl bg-surface-container-lowest border border-outline-variant rounded-xl p-md md:p-xl">
-<header class="mb-xl border-b border-outline-variant pb-md">
-<h1 class="font-h1-ui text-h1-ui text-on-surface">Configure Your Sweep</h1>
-<p class="text-on-surface-variant mt-sm">Define parameters to visualize functional behavior over a set domain.</p>
-</header>
-<form class="space-y-xl">
-<!-- Select Sweeper -->
-<section>
-<h2 class="font-label-caps text-label-caps text-on-surface-variant uppercase mb-md">Select Sweeper Variable</h2>
-<div class="flex gap-md flex-wrap">
-<button class="px-lg py-sm rounded-full border-2 border-primary text-primary font-math-inline text-math-inline focus:ring-2 focus:ring-primary focus:ring-offset-2 bg-primary-fixed-dim shadow-sm flex items-center justify-center min-w-[3rem]" type="button">
-                                t
-                            </button>
-<button class="px-lg py-sm rounded-full border border-outline-variant text-on-surface-variant font-math-inline text-math-inline hover:bg-surface-container hover:border-outline focus:ring-2 focus:ring-primary focus:ring-offset-2 flex items-center justify-center min-w-[3rem] transition-colors" type="button">
-                                x
-                            </button>
-<button class="px-lg py-sm rounded-full border border-outline-variant text-on-surface-variant font-math-inline text-math-inline hover:bg-surface-container hover:border-outline focus:ring-2 focus:ring-primary focus:ring-offset-2 flex items-center justify-center min-w-[3rem] transition-colors" type="button">
-                                y
-                            </button>
-</div>
-</section>
-<!-- Fixed Values Input -->
-<section class="bg-surface-container-low p-md rounded-lg border border-surface-variant">
-<h2 class="font-label-caps text-label-caps text-on-surface-variant uppercase mb-md">Fixed Constants</h2>
-<div class="grid grid-cols-1 md:grid-cols-2 gap-lg">
-<div class="flex flex-col gap-xs">
-<label class="font-math-inline text-math-inline text-on-surface" for="const-v">v</label>
-<input class="border border-outline-variant rounded bg-surface-container-lowest p-sm font-math-inline text-math-inline text-on-surface focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-shadow w-full" id="const-v" type="number" value="10"/>
-</div>
-<div class="flex flex-col gap-xs">
-<label class="font-math-inline text-math-inline text-on-surface" for="const-k">k</label>
-<input class="border border-outline-variant rounded bg-surface-container-lowest p-sm font-math-inline text-math-inline text-on-surface focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-shadow w-full" id="const-k" placeholder="e.g., 0.5" type="number"/>
-</div>
-</div>
-</section>
-<!-- Range Settings -->
-<section>
-<h2 class="font-label-caps text-label-caps text-on-surface-variant uppercase mb-md">Range Settings (t)</h2>
-<div class="grid grid-cols-1 sm:grid-cols-3 gap-md">
-<div class="flex flex-col gap-xs relative group">
-<label class="text-sm font-medium text-on-surface-variant" for="range-start">Start</label>
-<input class="border-l-4 border-l-transparent focus:border-l-primary border-y border-r border-outline-variant rounded-r bg-surface-container-lowest p-sm font-math-inline text-math-inline text-on-surface focus:ring-0 focus:outline-none transition-all w-full" id="range-start" type="number" value="0"/>
-</div>
-<div class="flex flex-col gap-xs relative group">
-<label class="text-sm font-medium text-on-surface-variant" for="range-end">End</label>
-<input class="border-l-4 border-l-transparent focus:border-l-primary border-y border-r border-outline-variant rounded-r bg-surface-container-lowest p-sm font-math-inline text-math-inline text-on-surface focus:ring-0 focus:outline-none transition-all w-full" id="range-end" type="number" value="100"/>
-</div>
-<div class="flex flex-col gap-xs relative group">
-<label class="text-sm font-medium text-on-surface-variant" for="range-steps">Steps</label>
-<input class="border-l-4 border-l-transparent focus:border-l-primary border-y border-r border-outline-variant rounded-r bg-surface-container-lowest p-sm font-math-inline text-math-inline text-on-surface focus:ring-0 focus:outline-none transition-all w-full" id="range-steps" type="number" value="50"/>
-</div>
-</div>
-</section>
-<!-- Generate Button -->
-<div class="pt-md border-t border-outline-variant flex justify-end">
-<button class="bg-secondary text-on-secondary px-xl py-md rounded font-h2-ui text-h2-ui text-sm hover:bg-on-secondary-fixed-variant transition-colors focus:ring-2 focus:ring-primary focus:ring-offset-2 flex items-center gap-2 active:translate-y-[1px] shadow-sm" type="button">
-<span class="material-symbols-outlined text-base" data-icon="show_chart">show_chart</span>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <div class="content-card">
+                <!-- Card Header -->
+                <header class="content-card-header">
+                    <h1 class="content-card-title h1-ui">Configure Your Sweep</h1>
+                    <p class="content-card-subtitle">Define parameters to visualize functional behavior over a set
+                        domain.</p>
+
+                    <!-- Formula Display -->
+                    <div class="formula-display">
+                        <span class="formula-label">Your formula:</span>
+                        <span class="formula-value" id="formula-to-sweep"></span>
+                    </div>
+                </header>
+
+                <!-- Form Content -->
+                <form class="form-content">
+                    <!-- Section: Select Sweeper Variable -->
+                    <section class="form-section">
+                        <h2 class="form-section-title">Select Sweeper Variable</h2>
+                        <div class="sweeper-variable-container">
+                            <!-- Variable Buttons -->
+                            <div class="variable-buttons-group">
+                                <button class="variable-button active" type="button" data-variable="t">
+                                    t
+                                </button>
+                                <button class="variable-button" type="button" data-variable="x">
+                                    x
+                                </button>
+                                <button class="variable-button" type="button" data-variable="y">
+                                    y
+                                </button>
+                            </div>
+
+                            <!-- Actions for Sweeper Variable -->
+                            <div id="actions-sweeper">
+                                <button type="button" class="pass-sweeper-button">Pass Sweeper</button>
+                                <div class="response-block">
+                                    <div class="response-indicator pending">?</div>
+                                    <span>Not chosen yet</span>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Section: Fixed Constants -->
+                    <section class="form-section form-section-alt">
+                        <h2 class="form-section-title">Fixed Constants</h2>
+                        <div class="fixed-constants-grid">
+                            <!-- Constants Input Fields -->
+                            <div id="their-containter">
+                                <div class="form-field">
+                                    <label class="form-label math-inline" for="const-v">v</label>
+                                    <input class="form-input" id="const-v" type="number" value="10" />
+                                </div>
+                                <div class="form-field">
+                                    <label class="form-label math-inline" for="const-k">k</label>
+                                    <input class="form-input" id="const-k" type="number" placeholder="e.g., 0.5" />
+                                </div>
+                            </div>
+
+                            <!-- Actions for Constants -->
+                            <div id="actions-sweeper-of-them">
+                                <button type="button" class="pass-sweeper-button">Pass Constants</button>
+                                <div class="response-block">
+                                    <div class="response-indicator pending">?</div>
+                                    <span>Not validated yet</span>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Section: Range Settings -->
+                    <section class="form-section">
+                        <h2 class="form-section-title">Range Settings (t)</h2>
+                        <div class="range-settings-grid">
+                            <div class="form-input-range-wrapper">
+                                <label class="form-label" for="range-start">Start</label>
+                                <input class="form-input-range" id="range-start" type="number" value="0" />
+                            </div>
+                            <div class="form-input-range-wrapper">
+                                <label class="form-label" for="range-end">End</label>
+                                <input class="form-input-range" id="range-end" type="number" value="100" />
+                            </div>
+                            <div class="form-input-range-wrapper">
+                                <label class="form-label" for="range-steps">Steps</label>
+                                <input class="form-input-range" id="range-steps" type="number" value="50" />
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Form Footer / Generate Button -->
+                    <div class="form-footer">
+                        <button class="primary-action-button" type="button">
+                            <span class="material-symbols-outlined icon" data-icon="show_chart">show_chart</span>
                             Perform Sweep &amp; Generate Plot
                         </button>
-</div>
-</form>
-</div>
-</main>
-</div>
-<!-- Footer -->
-<footer class="bg-slate-50 dark:bg-slate-900 text-slate-500 dark:text-slate-400 font-['Space_Grotesk'] text-sm full-width border-t border-slate-200 dark:border-slate-800 flat no shadows w-full py-8 px-6 mt-auto flex flex-col md:flex-row justify-between items-center gap-4 z-50 relative md:ml-64 w-auto">
-<div class="text-sm font-semibold text-slate-700 dark:text-slate-300">
-            © 2024 MathSolver. Clinical Precision.
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-copyright">© 2024 MathSolver. Clinical Precision.</div>
+            <div class="footer-links">
+                <a href="#" class="footer-link">Documentation</a>
+                <a href="#" class="footer-link">Privacy</a>
+                <a href="#" class="footer-link">Terms</a>
+                <a href="#" class="footer-link">API</a>
+            </div>
         </div>
-<div class="flex gap-4 flex-wrap justify-center">
-<a class="text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 underline transition-all cursor-pointer" href="#">Documentation</a>
-<a class="text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 underline transition-all cursor-pointer" href="#">Privacy</a>
-<a class="text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 underline transition-all cursor-pointer" href="#">Terms</a>
-<a class="text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 underline transition-all cursor-pointer" href="#">API</a>
-</div>
-</footer>
-</body></html>
+    </footer>
+</body>
+
+</html>
