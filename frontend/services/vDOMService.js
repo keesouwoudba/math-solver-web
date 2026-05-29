@@ -294,9 +294,13 @@ export default class VDOMService {
         datatarget,
         href,
         title,
+        type,
+        name,
+        ariaHidden,
         id,
         children,
         ["data-target"]: dataTargetAttr,
+        ["aria-hidden"]: ariaHiddenAttr,
       } = node;
 
       const el = document.createElement(tag);
@@ -327,6 +331,16 @@ export default class VDOMService {
       }
       if (title !== undefined) {
         el.setAttribute("title", title);
+      }
+      if (type !== undefined) {
+        el.setAttribute("type", type);
+      }
+      if (name !== undefined) {
+        el.setAttribute("name", name);
+      }
+      const ariaHiddenValue = ariaHidden ?? ariaHiddenAttr;
+      if (ariaHiddenValue !== undefined) {
+        el.setAttribute("aria-hidden", String(ariaHiddenValue));
       }
       const dataTarget = datatarget ?? dataTargetAttr;
       if (dataTarget !== undefined) {
