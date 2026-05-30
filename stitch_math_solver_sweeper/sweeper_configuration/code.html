@@ -14,148 +14,115 @@
 </head>
 
 <body class="body-main">
-    <!-- Top App Bar -->
-    <header class="top-app-bar">
-        <div class="app-bar-branding">
-            <span class="material-symbols-outlined icon" data-icon="function">function</span>
-            <span class="title">MathSolver</span>
+    <main>
+        <!-- Formula Display -->
+        <div class="formula-display" id="current-formula">
+            <span class="formula-label">YOUR FORMULA</span>
+            <div class="formula-value" id="formula-to-sweep">2*t + 3*x - 5*y = 0</div>
         </div>
-        <button class="help-button">
-            Help
-        </button>
-    </header>
 
-    <!-- Main Layout -->
-    <div class="layout-wrapper">
-        <!-- Navigation Drawer -->
-        <nav class="nav-drawer">
-            <div class="nav-drawer-menu-label">Menu</div>
-            <a href="#" class="nav-link">
-                <span class="material-symbols-outlined icon" data-icon="calculate">calculate</span>
-                Solver
-            </a>
-            <a href="#" class="nav-link active">
-                <span class="material-symbols-outlined icon" data-icon="cleaning_services">cleaning_services</span>
-                Sweeper
-            </a>
-        </nav>
-
-        <!-- Main Content Area -->
-        <main class="main-content">
-            <div class="content-card">
-                <!-- Card Header -->
-                <header class="content-card-header">
-                    <h1 class="content-card-title h1-ui">Configure Your Sweep</h1>
-                    <p class="content-card-subtitle">Define parameters to visualize functional behavior over a set
-                        domain.</p>
-
-                    <!-- Formula Display -->
-                    <div class="formula-display">
-                        <span class="formula-label">Your formula:</span>
-                        <span class="formula-value" id="formula-to-sweep"></span>
-                    </div>
-                </header>
-
-                <!-- Form Content -->
-                <form class="form-content">
-                    <!-- Section: Select Sweeper Variable -->
-                    <section class="form-section">
-                        <h2 class="form-section-title">Select Sweeper Variable</h2>
-                        <div class="sweeper-variable-container">
-                            <!-- Variable Buttons -->
-                            <div class="variable-buttons-group">
-                                <button class="variable-button active" type="button" data-variable="t">
-                                    t
-                                </button>
-                                <button class="variable-button" type="button" data-variable="x">
-                                    x
-                                </button>
-                                <button class="variable-button" type="button" data-variable="y">
-                                    y
-                                </button>
-                            </div>
-
-                            <!-- Actions for Sweeper Variable -->
-                            <div id="actions-sweeper">
-                                <button type="button" class="pass-sweeper-button">Pass Sweeper</button>
-                                <div class="response-block">
-                                    <div class="response-indicator pending">?</div>
-                                    <span>Not chosen yet</span>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-
-                    <!-- Section: Fixed Constants -->
-                    <section class="form-section form-section-alt">
-                        <h2 class="form-section-title">Fixed Constants</h2>
-                        <div class="fixed-constants-grid">
-                            <!-- Constants Input Fields -->
-                            <div id="their-containter">
-                                <div class="form-field">
-                                    <label class="form-label math-inline" for="const-v">v</label>
-                                    <input class="form-input" id="const-v" type="number" value="10" />
-                                </div>
-                                <div class="form-field">
-                                    <label class="form-label math-inline" for="const-k">k</label>
-                                    <input class="form-input" id="const-k" type="number" placeholder="e.g., 0.5" />
-                                </div>
-                            </div>
-
-                            <!-- Actions for Constants -->
-                            <div id="actions-sweeper-of-them">
-                                <button type="button" class="pass-sweeper-button">Pass Constants</button>
-                                <div class="response-block">
-                                    <div class="response-indicator pending">?</div>
-                                    <span>Not validated yet</span>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-
-                    <!-- Section: Range Settings -->
-                    <section class="form-section">
-                        <h2 class="form-section-title">Range Settings (t)</h2>
-                        <div class="range-settings-grid">
-                            <div class="form-input-range-wrapper">
-                                <label class="form-label" for="range-start">Start</label>
-                                <input class="form-input-range" id="range-start" type="number" value="0" />
-                            </div>
-                            <div class="form-input-range-wrapper">
-                                <label class="form-label" for="range-end">End</label>
-                                <input class="form-input-range" id="range-end" type="number" value="100" />
-                            </div>
-                            <div class="form-input-range-wrapper">
-                                <label class="form-label" for="range-steps">Steps</label>
-                                <input class="form-input-range" id="range-steps" type="number" value="50" />
-                            </div>
-                        </div>
-                    </section>
-
-                    <!-- Form Footer / Generate Button -->
-                    <div class="form-footer">
-                        <button class="primary-action-button" type="button">
-                            <span class="material-symbols-outlined icon" data-icon="show_chart">show_chart</span>
-                            Perform Sweep &amp; Generate Plot
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </main>
-    </div>
-
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="footer-content">
-            <div class="footer-copyright">© 2024 MathSolver. Clinical Precision.</div>
-            <div class="footer-links">
-                <a href="#" class="footer-link">Documentation</a>
-                <a href="#" class="footer-link">Privacy</a>
-                <a href="#" class="footer-link">Terms</a>
-                <a href="#" class="footer-link">API</a>
-            </div>
+        <!-- Sweeper Configuration Header -->
+        <div class="configuration-section">
+            <h1 class="configuration-title">Configure Your Sweep</h1>
+            <p class="configuration-subtitle">Define parameters to visualize functional behavior over a set domain.</p>
         </div>
-    </footer>
+
+        <!-- Section: Select Sweeper Variable -->
+        <section class="form-section">
+            <h2 class="form-section-title">Select Sweeper Variable</h2>
+            <fieldset class="sweeper-variables-grid" id="sweeper-variables-group">
+                <legend class="sr-only">Sweeper Variables</legend>
+                <!-- Sweeper Variable Option Template (generated dynamically or below as example) -->
+                <div class="sweeper-variable-option-container">
+                    <label class="sweeper-variable-option">
+                        <input class="sweeper-variable-input" type="radio" name="sweeper-variable" id="sweeper-var-t"
+                            value="t">
+                        <span class="sweeper-variable-symbol">t</span>
+                    </label>
+                </div>
+                <!-- Sweeper Variable Option Template -->
+                <div class="sweeper-variable-option-container">
+                    <label class="sweeper-variable-option">
+                        <input class="sweeper-variable-input" type="radio" name="sweeper-variable" id="sweeper-var-x"
+                            value="x">
+                        <span class="sweeper-variable-symbol">x</span>
+                    </label>
+                </div>
+                <!-- Sweeper Variable Option Template -->
+                <div class="sweeper-variable-option-container">
+                    <label class="sweeper-variable-option">
+                        <input class="sweeper-variable-input" type="radio" name="sweeper-variable" id="sweeper-var-y"
+                            value="y">
+                        <span class="sweeper-variable-symbol">y</span>
+                    </label>
+                </div>
+            </fieldset>
+
+            <!-- Actions for Sweeper Variable -->
+            <div id="actions-sweeper">
+                <button type="button" class="pass-sweeper-button">Pass Sweeper</button>
+                <div class="response-block">
+                    <div class="response-indicator pending">?</div>
+                    <span>Not chosen yet</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Fixed Constants -->
+        <section class="form-section form-section-alt">
+            <h2 class="form-section-title">Fixed Constants</h2>
+            <div class="fixed-constants-grid">
+                <!-- Constants Input Fields -->
+                <div id="constants-container">
+                    <div class="form-field">
+                        <label class="form-label math-inline" for="const-v">v</label>
+                        <input class="form-input" id="const-v" type="number" value="10" />
+                    </div>
+                    <div class="form-field">
+                        <label class="form-label math-inline" for="const-k">k</label>
+                        <input class="form-input" id="const-k" type="number" placeholder="e.g., 0.5" />
+                    </div>
+                </div>
+
+                <!-- Actions for Constants -->
+                <div id="actions-constants">
+                    <button type="button" class="pass-sweeper-button">Pass Constants</button>
+                    <div class="response-block">
+                        <div class="response-indicator pending">?</div>
+                        <span>Not validated yet</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Range Settings -->
+        <section class="form-section">
+            <h2 class="form-section-title">Range Settings (t)</h2>
+            <div class="range-settings-grid">
+                <div class="form-input-range-wrapper">
+                    <label class="form-label" for="range-start">Start</label>
+                    <input class="form-input-range" id="range-start" type="number" value="0" />
+                </div>
+                <div class="form-input-range-wrapper">
+                    <label class="form-label" for="range-end">End</label>
+                    <input class="form-input-range" id="range-end" type="number" value="100" />
+                </div>
+                <div class="form-input-range-wrapper">
+                    <label class="form-label" for="range-steps">Steps</label>
+                    <input class="form-input-range" id="range-steps" type="number" value="50" />
+                </div>
+            </div>
+        </section>
+
+        <!-- Actions Row / Generate Button -->
+        <div class="actions-row">
+            <button class="primary-action-button" type="button">
+                <span class="material-symbols-outlined icon" data-icon="show_chart">show_chart</span>
+                Perform Sweep &amp; Generate Plot
+            </button>
+        </div>
+    </main>
+
 </body>
 
 </html>

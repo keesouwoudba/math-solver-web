@@ -21,6 +21,12 @@ export default class ScreenContextService {
   jsonDataSolverSolutionsChoicePage;
   solverSolutionsChoicePageHasContext;
 
+  //plotterSweeperConfigPage
+  PlotterSweeperConfigPageData;
+  jsonPlotterPassSweeper;
+  jsonPlotterVerifyFixed;
+  plotterSweeperConfigPageHasContext;
+
   constructor() {
     console.log("ScreenContextService: Initializing service");
     window.app.ScreenContextService = this;
@@ -116,7 +122,34 @@ export default class ScreenContextService {
       json: this.jsonDataSolverSolutionsChoicePage,
     };
   }
-
+  setPlotterSweeperConfigPageContext(
+    data,
+    jsonSweeper,
+    jsonFixed,
+    hasContext = true,
+  ) {
+    console.log(
+      "ScreenContextService: Setting PlotterSweeperConfigPage data and JSON",
+    );
+    this.PlotterSweeperConfigPageData = data;
+    this.jsonPlotterPassSweeper = jsonSweeper;
+    this.jsonPlotterVerifyFixed = jsonFixed;
+    this.plotterSweeperConfigPageHasContext = hasContext;
+    console.log(
+      "ScreenContextService: Data and JSON set for PlotterSweeperConfigPage",
+    );
+  }
+  getPlotterSweeperConfigPageContext() {
+    console.log(
+      "ScreenContextService: Getting PlotterSweeperConfigPage data and JSON",
+    );
+    return {
+      data: this.PlotterSweeperConfigPageData,
+      hasContext: this.plotterSweeperConfigPageHasContext,
+      jsonPassSweeper: this.jsonPlotterPassSweeper,
+      jsonVerifyFixed: this.jsonPlotterVerifyFixed,
+    };
+  }
   resetScreenContext() {
     console.log("ScreenContextService: Resetting all screen contexts");
     this.SolverHomePageData = undefined;
@@ -130,6 +163,11 @@ export default class ScreenContextService {
     this.SolverEquationResultsPageData = undefined;
     this.jsonDataSolverEquationResultsPage = undefined;
     this.solverEquationResultsPageHasContext = false;
+
+    this.PlotterSweeperConfigPageData = undefined;
+    this.jsonPlotterPassSweeper = undefined;
+    this.jsonPlotterVerifyFixed = undefined;
+    this.plotterSweeperConfigPageHasContext = false;
 
     console.log("ScreenContextService: All screen contexts reset");
   }

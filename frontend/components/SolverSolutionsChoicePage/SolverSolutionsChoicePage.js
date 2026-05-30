@@ -14,10 +14,10 @@ export class SolverSolutionsChoicePage extends HTMLElement {
 
   //data
   data;
+  jsonDataSolverSolutionsChoicePage;
 
   //previous page (variables page, for taking solutions)
   jsonDataSolverVariablesPage;
-  jsonDataSolverSolutionsChoicePage;
 
   //dom and state references
   prevVDOM;
