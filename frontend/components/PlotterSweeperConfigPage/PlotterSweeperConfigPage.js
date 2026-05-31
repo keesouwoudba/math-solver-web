@@ -32,6 +32,21 @@ export class PlotterSweeperConfigPage extends HTMLElement {
     verifyFixed: {
       //example  "fixed-[variableName]": {current: "", selectionStart: 0, selectionEnd:0, isFocused: false}
     },
+    performSweep: {
+      start: {
+        current: 0,
+        selectionStart: 0,
+        selectionEnd: 0,
+        isFocused: false,
+      },
+      end: { current: 0, selectionStart: 0, selectionEnd: 0, isFocused: false },
+      step: {
+        current: 200,
+        selectionStart: 0,
+        selectionEnd: 0,
+        isFocused: false,
+      },
+    },
   };
   radioGroupReference = {
     currentChosen: "",
@@ -39,7 +54,113 @@ export class PlotterSweeperConfigPage extends HTMLElement {
     isChosen: false,
     //"sweeper-option-[variableName]": {isFocused: false}
   };
-  dynamicVDOM = [];
+  dynamicVDOM = [
+    {
+      //susceptioble index
+      tag: "div",
+      className: "formula-display",
+      id: "current-formula",
+      children: [
+        {
+          tag: "span",
+          className: "formula-label",
+          textContent: "YOUR FORMULA",
+        },
+        {
+          tag: "div",
+          className: "formula-value",
+          id: "formula-to-sweep",
+          textContent: "", //to be injected by addFormulaToSweepToDOM(formula:"string");
+        },
+      ],
+    },
+    {
+      tag: "div",
+      className: "configuration-section",
+      children: [
+        {
+          tag: "h1",
+          className: "configuration-title",
+          textContent: "Configure Your Sweep",
+        },
+        {
+          tag: "p",
+          className: "configuration-subtitle",
+          textContent:
+            "Define parameters to visualize functional behavior over a set domain.",
+        },
+      ],
+    },
+    {
+      tag: "section",
+      className: "form-section",
+      id: "sweeper-variable-section",
+      children: [
+        {
+          tag: "h2",
+          className: "form-section-title",
+          textContent: "Select Sweeper Variable",
+        },
+        {
+          tag: "fieldset",
+          className: "sweeper-variables-grid",
+          id: "sweeper-variables-group",
+          children: [
+            {
+              tag: "legend",
+              className: "sr-only",
+              textContent: "Sweeper Variables",
+            },
+            //template that will be dynamically added as variable options:
+            // {
+            //   tag: "div",
+            //   className: "sweeper-variable-option-container",
+            //   children: [
+            //     {
+            //       tag: "label",
+            //       className: "sweeper-variable-option",
+            //       children: [
+            //         {
+            //           tag: "input",
+            //           className: "sweeper-variable-input",
+            //           type: "radio",
+            //           name: "sweeper-variable",
+            //           id: "sweeper-var-t",
+            //           value: "t",
+            //         },
+            //         {tag: "span", className: "sweeper-variable-symbol", textContent: "t"}
+            //       ],
+            //     },
+            //   ],
+            // },
+          ],
+        },
+        {
+          tag: "div",
+          id: "actions-sweeper",
+          children: [
+            {
+              tag: "button",
+              type: "button",
+              className: "pass-sweeper-button",
+              textContent: "Pass Sweeper",
+            },
+            {
+              tag: "div",
+              className: "response-block",
+              children: [
+                {
+                  tag: "div", //if response of api call is success, i need to make status success and display as green or smth like that, checkmark icon. if pending, then ? pending class ? icon, if error, red with white X sticker
+                  className: "response-indicator pending",
+                  textContent: "?",
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+  ];
 
   constructor() {
     super();
@@ -47,8 +168,14 @@ export class PlotterSweeperConfigPage extends HTMLElement {
     this.loadCSS();
     this.activateData();
   }
-  connectedCallback() {}
-  disconnectedCallback() {}
+  connectedCallback() {
+    console.log(`PlotterSweeperConfigPage: Connected to DOM, rendering VDOM`);
+    this.MyVDOMService.updateDOM("connected callback initial render");
+  }
+  disconnectedCallback() {
+    console.log(`PlotterSweeperConfigPage: Disconnected from DOM, cleaning up`);
+    this.updateScreenContext();
+  }
 
   loadCSS() {
     console.log(
@@ -80,7 +207,6 @@ export class PlotterSweeperConfigPage extends HTMLElement {
         },
         radioGroupReference: this.radioGroupReference,
         inputStateReferences: this.inputStateReferences,
-        solutions: [],
         jsonDataSolverSolutionsChoicePage:
           this.jsonDataSolverSolutionsChoicePage,
         MyVDOMService: this.MyVDOMService,
