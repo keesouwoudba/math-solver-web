@@ -14,6 +14,9 @@ import { SolverEquationResultsPage } from "/frontend/components/SolverEquationRe
 import { SolverSolutionsChoicePage } from "/frontend/components/SolverSolutionsChoicePage/SolverSolutionsChoicePage.js";
 import { PlotterSweeperConfigPage } from "/frontend/components/PlotterSweeperConfigPage/PlotterSweeperConfigPage.js";
 
+//common components:
+import { StatefulBox } from "/frontend/components/common/StatefulBox.js";
+
 window.app = {};
 window.app.router = Router;
 window.app.ScreenContextService = ScreenContextService.getInstance();

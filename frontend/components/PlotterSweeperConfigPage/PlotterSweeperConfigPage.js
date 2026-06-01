@@ -30,7 +30,7 @@ export class PlotterSweeperConfigPage extends HTMLElement {
 
   inputStateReferences = {
     verifyFixed: {
-      //example  "fixed-[variableName]": {current: "", selectionStart: 0, selectionEnd:0, isFocused: false}
+      //"fixed-[variableName]": {current: "", selectionStart: 0, selectionEnd:0, isFocused: false}
     },
     performSweep: {
       start: {
@@ -52,8 +52,18 @@ export class PlotterSweeperConfigPage extends HTMLElement {
     currentChosen: "",
     chosenIndex: null,
     isChosen: false,
-    //"sweeper-option-[variableName]": {isFocused: false}
+    variables: {
+      //"sweeper-option-[variableName]": {isFocused: false}
+    },
   };
+  responseBlockReferences = {
+    sweeper: {
+      isSuccess: false, //pending, success, error
+      state: "pending",
+      current: "?",
+    },
+  };
+
   dynamicVDOM = [
     {
       //susceptioble index
@@ -91,75 +101,240 @@ export class PlotterSweeperConfigPage extends HTMLElement {
         },
       ],
     },
-    {
-      tag: "section",
-      className: "form-section",
-      id: "sweeper-variable-section",
-      children: [
-        {
-          tag: "h2",
-          className: "form-section-title",
-          textContent: "Select Sweeper Variable",
-        },
-        {
-          tag: "fieldset",
-          className: "sweeper-variables-grid",
-          id: "sweeper-variables-group",
-          children: [
-            {
-              tag: "legend",
-              className: "sr-only",
-              textContent: "Sweeper Variables",
-            },
-            //template that will be dynamically added as variable options:
-            // {
-            //   tag: "div",
-            //   className: "sweeper-variable-option-container",
-            //   children: [
-            //     {
-            //       tag: "label",
-            //       className: "sweeper-variable-option",
-            //       children: [
-            //         {
-            //           tag: "input",
-            //           className: "sweeper-variable-input",
-            //           type: "radio",
-            //           name: "sweeper-variable",
-            //           id: "sweeper-var-t",
-            //           value: "t",
-            //         },
-            //         {tag: "span", className: "sweeper-variable-symbol", textContent: "t"}
-            //       ],
-            //     },
-            //   ],
-            // },
-          ],
-        },
-        {
-          tag: "div",
-          id: "actions-sweeper",
-          children: [
-            {
-              tag: "button",
-              type: "button",
-              className: "pass-sweeper-button",
-              textContent: "Pass Sweeper",
-            },
-            {
-              tag: "div",
-              className: "response-block",
-              children: [
-                {
-                  tag: "div", //if response of api call is success, i need to make status success and display as green or smth like that, checkmark icon. if pending, then ? pending class ? icon, if error, red with white X sticker
-                  className: "response-indicator pending",
-                  textContent: "?",
-                },
-              ],
-            },
-          ],
-        },
-      ],
-    },
+    // { //will be added if there are variables to choose for sweeper
+    //   //susceptible
+    //   tag: "section",
+    //   className: "form-section",
+    //   id: "sweeper-variable-section",
+    //   children: [
+    //     {
+    //       tag: "h2",
+    //       className: "form-section-title",
+    //       textContent: "Select Sweeper Variable",
+    //     },
+    //     {
+    //       tag: "fieldset",
+    //       className: "sweeper-variables-grid",
+    //       id: "sweeper-variables-group",
+    //       children: [
+    //         {
+    //           tag: "legend",
+    //           className: "sr-only",
+    //           textContent: "Sweeper Variables",
+    //         },
+    //         //template that will be dynamically added as variable options:
+    //         // {
+    //         //   tag: "div",
+    //         //   className: "sweeper-variable-option-container",
+    //         //   children: [
+    //         //     {
+    //         //       tag: "label",
+    //         //       className: "sweeper-variable-option",
+    //         //       children: [
+    //         //         {
+    //         //           tag: "input",
+    //         //           className: "sweeper-variable-input",
+    //         //           type: "radio",
+    //         //           name: "sweeper-variable",
+    //         //           id: "sweeper-var-t",
+    //         //           value: "t",
+    //         //         },
+    //         //         {tag: "span", className: "sweeper-variable-symbol", textContent: "t"}
+    //         //       ],
+    //         //     },
+    //         //   ],
+    //         // },
+    //       ],
+    //     },
+    //     {
+    //       tag: "div",
+    //       id: "actions-sweeper",
+    //       children: [
+    //         {
+    //           tag: "button",
+    //           type: "button",
+    //           className: "pass-sweeper-button",
+    //           textContent: "Pass Sweeper",
+    //         },
+    //         {
+    //           tag: "div",
+    //           className: "response-block",
+    //           id: "response-block-sweeper",
+    //           children: [
+    //             {
+    //               tag: "stateful-box", //if response of api call is success, i need to make status success and display as green or smth like that, checkmark icon. if pending, then ? pending class ? icon, if error, red with white X sticker
+    //               className: "response-indicator pending",
+    //               id: "response-indicator-sweeper",
+    //               stateRef: this.responseBlockReferences.sweeper,
+    //             },
+    //           ],
+    //         },
+    //       ],
+    //     },
+    //   ],
+    // },
+    ///////////////////////////////
+    //susceptioble index
+    // { //will be added if there are consants to fix
+    //   tag: "section",
+    //   className: "form-section form-section-alt",
+    //   children: [
+    //     {
+    //       tag: "h2",
+    //       className: "form-section-title",
+    //       textContent: "Fixed Constants",
+    //     },
+    //     {
+    //       tag: "div",
+    //       className: "fixed-constants-grid",
+    //       children: [
+    //         // { //will be added for each constant that needs to be fixed
+    //         //   tag: "div",
+    //         //   id: "constants-container",
+    //         //   children: [
+    //         //     {
+    //         //       tag: "div",
+    //         //       className: "form-field",
+    //         //       children: [
+    //         //         {
+    //         //           tag: "label",
+    //         //           className: "form-label math-inline",
+    //         //           for: "const-v",
+    //         //           textContent: "v",
+    //         //         },
+    //         //         {
+    //         //           tag: "input",
+    //         //           className: "form-input",
+    //         //           id: "const-v",
+    //         //           type: "number",
+    //         //           value: "10",
+    //         //         },
+    //         //       ],
+    //         //     },
+    //         //   ],
+    //         // },
+    //         {
+    //           tag: "div",
+    //           id: "actions-constants",
+    //           children: [
+    //             {
+    //               tag: "button",
+    //               type: "button",
+    //               className: "pass-sweeper-button",
+    //               textContent: "Pass Constants",
+    //             },
+    //             {
+    //               tag: "div",
+    //               className: "response-block",
+    //               children: [
+    //                 {
+    //                   tag: "stateful-box",
+    //                   className: "response-indicator pending",
+    //                   stateRef: this.responseBlockReferences.sweeper,
+    //                   textContent: "?",
+    //                 },
+    //               ],
+    //             },
+    //           ],
+    //         },
+    //       ],
+    //     },
+    //   ],
+    // },
+    //////////////////////////////
+    //will be added if there was a sweeper. at least one var
+    //     <!-- Section: Range Settings -->
+    // {
+    //   tag: "section",
+    //   className: "form-section",
+    //   id: "range-settings-section",
+    //   children: [
+    //     {
+    //       tag: "h2",
+    //       className: "form-section-title",
+    //       textContent: "Range Settings",
+    //     },
+    //     {
+    //       tag: "div",
+    //       className: "range-settings-grid",
+    //       children: [
+    //         {
+    //           tag: "div",
+    //           className: "form-input-range-wrapper",
+    //           children: [
+    //             {
+    //               tag: "label",
+    //               className: "form-label",
+    //               for: "range-start",
+    //               textContent: "Start",
+    //             },
+    //             {
+    //               tag: "input",
+    //               className: "form-input-range",
+    //               id: "range-start",
+    //               type: "number",
+    //               value: "0",
+    //             },
+    //           ],
+    //         },
+    //         {
+    //           tag: "div",
+    //           className: "form-input-range-wrapper",
+    //           children: [
+    //             {
+    //               tag: "label",
+    //               className: "form-label",
+    //               for: "range-end",
+    //               textContent: "End",
+    //             },
+    //             {
+    //               tag: "input",
+    //               className: "form-input-range",
+    //               id: "range-end",
+    //               type: "number",
+    //               value: "100",
+    //             },
+    //           ],
+    //         },
+    //         {
+    //           tag: "div",
+    //           className: "form-input-range-wrapper",
+    //           children: [
+    //             {
+    //               tag: "label",
+    //               className: "form-label",
+    //               for: "range-steps",
+    //               textContent: "Steps",
+    //             },
+    //             {
+    //               tag: "input",
+    //               className: "form-input-range",
+    //               id: "range-steps",
+    //               type: "number",
+    //               value: "50",
+    //             },
+    //           ],
+    //         },
+    //       ],
+    //     },
+    //   ],
+    // },
+    /////////////////////
+    //will be always added at the end
+    // {
+    //   tag: "div",
+    //   className: "actions-row",
+    //   children: [
+    //     {
+    //       tag: "button",
+    //       className: "primary-action-button",
+    //       type: "button",
+    //       children: [
+    //         { tag: "span", textContent: "Perform Sweep & Generate Plot" },
+    //       ],
+    //     },
+    //   ]
+    // },
   ];
 
   constructor() {
@@ -278,4 +453,5 @@ export class PlotterSweeperConfigPage extends HTMLElement {
       "PlotterSweeperConfigPage: State recreated from screen context",
     );
   }
+  addFormulaToSweepToDOM() {}
 }

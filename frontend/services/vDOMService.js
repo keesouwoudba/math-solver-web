@@ -1,3 +1,4 @@
+import { StatefulBox } from "../components/common/StatefulBox.js";
 export default class VDOMService {
   realDOM;
   data;
@@ -48,8 +49,8 @@ export default class VDOMService {
       return patches;
     } else {
       for (let i = 0; i < Math.max(prevVDOM.length, newVDOM.length); i++) {
-        const prevNode = prevVDOM[i];
-        const newNode = newVDOM[i];
+        const prevNode = prevVDOM[i] ?? [];
+        const newNode = newVDOM[i] ?? [];
         if (JSON.stringify(prevNode) !== JSON.stringify(newNode)) {
           patches.push({ index: i, newNode: newNode, prevNode: prevNode });
         }
@@ -64,6 +65,7 @@ export default class VDOMService {
     });
     return elems;
   }
+
   //recursive patcher
   patchNode(elems, patch, parentEl = null) {
     const { prevNode, newNode, index } = patch || {};
@@ -115,10 +117,7 @@ export default class VDOMService {
             /* do nothing */
           }
         }
-      } else if (
-        targetEl instanceof HTMLSelectElement ||
-        targetEl instanceof HTMLInputElement
-      ) {
+      } else if (targetEl instanceof HTMLSelectElement) {
         try {
           targetEl.focus();
         } catch (e) {
@@ -180,6 +179,9 @@ export default class VDOMService {
         (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement)
       ) {
         el.value = newValue ?? "";
+      }
+      if (oldText !== newText && el instanceof StatefulBox) {
+        el.textContent = String(newText ?? "");
       }
 
       if (
@@ -323,7 +325,7 @@ export default class VDOMService {
       const nodeText =
         textContent !== undefined
           ? textContent
-          : tag === "button" || tag === "label"
+          : tag === "button" || tag === "label" || tag === "stateful-box"
             ? nodeValue
             : undefined;
       if (
