@@ -568,6 +568,7 @@ export class SolverHomePage extends HTMLElement {
               console.log(`SolverHomePage: Server response indicates success`);
               // we are supposed to take the variables from the equation and move to the next page (for choosing the varibales)
               this.jsonDataSolverHomePage = jsonDataSolverHomePage; //before this is was replacing all manual assignemnts with faca
+              this.updateScreenContext();
               const { variables, status_bool, valid, error, formula_string } =
                 jsonDataSolverHomePage;
 

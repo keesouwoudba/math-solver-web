@@ -94,8 +94,8 @@ class FormulaSolver:
                 "available": self.variables_list,
                 "target": target,
                 "formula_string": self.formula_string,
-                "required_list_str": [], 
-                "index": None
+                # "required_list_str": [], 
+                # "index": None
             }
 
         if not target in self.variables_list:
@@ -109,7 +109,7 @@ class FormulaSolver:
                 "required_list_str": [],
                 "target": target,
                 "formula_string": self.formula_string, 
-                "index": None
+                # "index": None
             }
 
         symbol = self.symbols_dict[target]
@@ -176,9 +176,9 @@ class FormulaSolver:
                     "is_one_var": self.is_one_var,      
                     "is_multi_var": self.is_multi_var,  
                     "equation_type": self.equation_type, 
-                    "index": self.index, 
-                    "sweeper": self.sweeper, 
-                    "fixed": self.fixed
+                    # "index": self.index, 
+                    # "sweeper": self.sweeper, 
+                    # "fixed": self.fixed
                 }
 
             # Multiple solutions
@@ -199,9 +199,9 @@ class FormulaSolver:
                     "is_one_var": False,         
                     "is_multi_var": False,       
                     "equation_type": "", 
-                    "index": self.index , 
-                    "sweeper": self.sweeper, 
-                    "fixed": self.fixed       
+                    # "index": self.index , 
+                    # "sweeper": self.sweeper, 
+                    # "fixed": self.fixed       
                 }
 
         except Exception as e:

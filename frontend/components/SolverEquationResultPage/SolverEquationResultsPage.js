@@ -200,7 +200,7 @@ export class SolverEquationResultsPage extends HTMLElement {
   activateData() {
     if (
       !this.data &&
-      !ScreenContextService.getInstance().SolverEquationResultsPageData
+      !this.screenContextService.getSolverEquationResultsPageContext().data
     ) {
       this.vDOM = VDOMService.createVDOM(this.dynamicVDOM);
       this.data = {

@@ -14,9 +14,12 @@ export default class VDOMService {
   createVDOM() {
     return this.data.vDOM;
   }
-  takeSnapshot() {
+  takeSnapshot(traceback) {
     this.data.prevVDOM = JSON.parse(JSON.stringify(this.data.vDOM));
-    console.log(`VDOMService: Snapshot taken. prevVDOM: `, this.data.prevVDOM);
+    console.log(
+      `VDOMService: Snapshot taken. traceback: ${traceback}, prevVDOM: `,
+      this.data.prevVDOM,
+    );
   }
 
   updateDOM(traceback) {
@@ -25,6 +28,19 @@ export default class VDOMService {
       this.realDOM.append(...this.data.elems);
     } else {
       console.log(`VDOMService: Updating DOM for traceback: ${traceback}`);
+      console.warn(
+        `VDOMService: previous VDOM: `,
+        JSON.stringify(this.data.prevVDOM),
+      );
+      console.warn(`VDOMService: new VDOM: `, JSON.stringify(this.data.vDOM));
+      console.warn(
+        `VDOMService: dynamicVDOM: `,
+        JSON.stringify(this.data.dynamicVDOM),
+      );
+      console.warn(
+        `is dynamicVDOM same object as vDOM? `,
+        this.data.dynamicVDOM === this.data.vDOM,
+      );
       const patches = this.diff(this.data.prevVDOM, this.data.vDOM);
       console.log(`VDOMService: ${traceback} patches: `, patches);
       this.data.elems = this.patch(this.data.elems, patches);
@@ -96,8 +112,28 @@ export default class VDOMService {
       children: newChildren,
     } = nextNode || {};
 
+    const applyCheckedState = (targetEl, stateRef) => {
+      if (
+        !targetEl ||
+        !stateRef ||
+        !(targetEl instanceof HTMLInputElement) ||
+        targetEl.type !== "radio" ||
+        targetEl.type !== "checkbox"
+      ) {
+        return;
+      }
+      if (stateRef.isChecked === undefined) {
+        return;
+      }
+      targetEl.checked = Boolean(stateRef.isChecked);
+    };
+
     const applyFocusState = (targetEl, stateRef) => {
-      if (!targetEl || !stateRef || !stateRef.isFocused) {
+      if (!targetEl || !stateRef) {
+        return;
+      }
+      applyCheckedState(targetEl, stateRef);
+      if (!stateRef.isFocused) {
         return;
       }
       if (
@@ -158,8 +194,10 @@ export default class VDOMService {
       oldId === newId &&
       el
     ) {
-      if (oldClassName !== newClassName) {
-        el.className = newClassName ?? "";
+      const oldClassNameValue = oldClassName ?? oldStateRef?.className;
+      const newClassNameValue = newClassName ?? newStateRef?.className;
+      if (oldClassNameValue !== newClassNameValue) {
+        el.className = newClassNameValue ?? "";
       }
 
       const oldValue = oldStateRef?.current ?? (oldNode && oldNode.value);
@@ -315,8 +353,9 @@ export default class VDOMService {
       } = node;
 
       const el = document.createElement(tag);
-      if (className !== undefined) {
-        el.className = className;
+      const classNameValue = className ?? stateRef?.className;
+      if (classNameValue !== undefined) {
+        el.className = classNameValue;
       }
       const nodeValue = stateRef?.current ?? value;
       if (nodeValue !== undefined) {
@@ -359,6 +398,14 @@ export default class VDOMService {
       }
       if (id !== undefined) {
         el.id = id;
+      }
+      const checkedState = stateRef?.isChecked;
+      if (
+        checkedState !== undefined &&
+        el instanceof HTMLInputElement &&
+        (el.type == "radio" || el.type == "checkbox")
+      ) {
+        el.checked = Boolean(checkedState);
       }
       if (children !== undefined && Array.isArray(children)) {
         if (children.length >= 1) {

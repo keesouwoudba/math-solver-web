@@ -28,7 +28,7 @@ export class SolverSolutionsChoicePage extends HTMLElement {
     solution: "",
     solutionIndex: null,
     isChosen: false,
-    //"solution_${index}": {isFocused: false}
+    //"solution_${index}": {isChecked: false}
   };
   // <template id="variable-option-template"> //each option for solution
   //     <div id="variable-option-container">
@@ -128,7 +128,7 @@ export class SolverSolutionsChoicePage extends HTMLElement {
   connectedCallback() {
     console.log(`SolverSolutionsChoicePage: connectedCallback called`);
     this.MyVDOMService.updateDOM("connectedCallback, initial render");
-    this.MyVDOMService.takeSnapshot(); //take snapshot after initial render to have the correct prevVDOM for the first update
+    this.MyVDOMService.takeSnapshot("connectedCallback, initial render"); //take snapshot after initial render to have the correct prevVDOM for the first update
     this.addFormulaToVDOM();
     this.addSolutionOptionsToVDOM();
     this.MyVDOMService.updateDOM(
@@ -154,11 +154,12 @@ export class SolverSolutionsChoicePage extends HTMLElement {
   }
 
   activateData() {
-    if (
-      !this.data &&
-      !ScreenContextService.getInstance().SolverSolutionsChoicePageData
-    ) {
+    if (!this.data) {
       this.vDOM = VDOMService.createVDOM(this.dynamicVDOM);
+      const solverSolutionsChoicePageContext =
+        this.screenContextService.getSolverSolutionsChoicePageContext() || {};
+      ({ json: this.jsonDataSolverSolutionsChoicePage = {} } =
+        solverSolutionsChoicePageContext);
       this.data = {
         vDOM: this.vDOM,
         prevVDOM: this.prevVDOM,
@@ -189,8 +190,7 @@ export class SolverSolutionsChoicePage extends HTMLElement {
         `SolverSolutionsChoicePage: VDOM activated and services initialized`,
       );
     } else {
-      //recreate state from screen context service
-      this.recreateStateFromScreenContext();
+      console.error("we should not have entered here");
     }
   }
   updateScreenContext() {
@@ -202,37 +202,23 @@ export class SolverSolutionsChoicePage extends HTMLElement {
       `SolverSolutionsChoicePage: Screen context updated with current data and JSON`,
     );
   }
-  recreateStateFromScreenContext() {
-    const solverSolutionsChoicePageContext =
-      this.screenContextService.getSolverSolutionsChoicePageContext() || {};
-    //destructure data and json from context
-    ({ data: this.data, json: this.jsonDataSolverSolutionsChoicePage } =
-      solverSolutionsChoicePageContext);
 
-    const solverSolutionsChoicePageData =
-      solverSolutionsChoicePageContext.data || {};
-    ({ vDOM: this.vDOM, prevVDOM: this.prevVDOM } =
-      solverSolutionsChoicePageData);
-
-    const solverVariablesPageContext =
-      this.screenContextService.getSolverVariablesPageContext() || {};
-    ({ json: this.jsonDataSolverVariablesPage } = solverVariablesPageContext);
-
-    this.elems = undefined; //to be recreated by VDOMService
-    this.data.elems = this.elems; //just in case
-
-    this.MyVDOMService = new VDOMService(this.root, this.data);
-    this.MyPopupService = new PopupService(this.root, this.data);
-
-    this.data.MyVDOMService = this.MyVDOMService; //to make sure data has the reference to the new instance of VDOMService
-    this.data.MyPopupService = this.MyPopupService; //to make sure data has the reference to the new instance of PopupService
-
-    console.log(
-      `SolverSolutionsChoicePage: State recreated from screen context with data and JSON`,
-    );
-  }
   addFormulaToVDOM() {
+    console.warn(
+      `this.dynamicVDOM at the beginning: `,
+      JSON.stringify(this.dynamicVDOM),
+    );
     const formulaValueContainer = this.dynamicVDOM[0].children[1];
+    console.warn(
+      `SolverSolutionsChoicePage: Adding formula to VDOM, formulaValueContainer reference: formula: ${this.jsonDataSolverVariablesPage?.formula_string}`,
+      formulaValueContainer,
+    );
+    //debug mode
+    console.warn(
+      `this.dynamicVDOM after retrieving formula container: `,
+      JSON.stringify(this.dynamicVDOM),
+    );
+
     if (
       formulaValueContainer &&
       this.jsonDataSolverVariablesPage?.formula_string
@@ -245,23 +231,44 @@ export class SolverSolutionsChoicePage extends HTMLElement {
         },
       ];
     }
+    console.warn(
+      `this.dynamicVDOM after adding formula: `,
+      JSON.stringify(this.dynamicVDOM),
+    );
   }
   addSolutionOptionsToVDOM() {
+    console.warn(
+      `this.dynamicVDOM before adding solution options: `,
+      JSON.stringify(this.dynamicVDOM),
+    );
     console.log(
       `SolverSolutionsChoicePage: Adding solution options to VDOM based on JSON data`,
     );
+
     const solutionsGroup = this.dynamicVDOM[2].children;
     console.log(
       `SolverSolutionsChoicePage: solutionsGroup reference obtained from dynamicVDOM`,
       solutionsGroup,
     );
     const solutionsOptions = this.jsonDataSolverVariablesPage?.solutions;
-    console.log(
+    console.warn(
       `SolverSolutionsChoicePage: solutionsOptions extracted from JSON data`,
       solutionsOptions,
     );
     if (solutionsOptions && solutionsOptions.length > 1) {
+      const radioGroupReference =
+        this.data?.radioGroupReference || this.radioGroupReference;
+      const selectedIndex = radioGroupReference.solutionIndex;
+      const selectedValue = radioGroupReference.solution;
       solutionsOptions.forEach((solution, index) => {
+        const stateRefKey = `solution_${index}`;
+        const stateRef =
+          radioGroupReference[stateRefKey] ||
+          (radioGroupReference[stateRefKey] = { isChecked: false });
+        const isSelected =
+          (selectedIndex !== null && selectedIndex === index) ||
+          (selectedValue !== "" && String(selectedValue) === String(index));
+        stateRef.isChecked = Boolean(isSelected);
         const optionVDOM = {
           tag: "div",
           className: "solution-option-container",
@@ -276,9 +283,7 @@ export class SolverSolutionsChoicePage extends HTMLElement {
                   className: "solution-input",
                   name: "solution",
                   value: index,
-                  stateRef: (this.radioGroupReference[`solution_${index}`] = {
-                    isFocused: false,
-                  }),
+                  stateRef,
                 },
                 {
                   tag: "span",
@@ -289,17 +294,40 @@ export class SolverSolutionsChoicePage extends HTMLElement {
             },
           ],
         };
+        console.log(
+          `SolverSolutionsChoicePage: Created VDOM for solution option index ${index}, solution: ${solution}, isSelected: ${isSelected}`,
+          optionVDOM,
+        );
         solutionsGroup.push(optionVDOM);
       });
+      console.warn(
+        `solutions group afeter adding solution options: `,
+        JSON.stringify(solutionsGroup),
+      );
+      console.warn(
+        `this.dynamicVDOM after adding solution options: `,
+        JSON.stringify(this.dynamicVDOM),
+      );
     }
   }
   setChosenSolution(solution, index) {
-    this.data.radioGroupReference.solution = solution;
-    this.data.radioGroupReference.isChosen = true;
-    this.data.radioGroupReference.solutionIndex = index;
+    const radioGroupReference =
+      this.data?.radioGroupReference || this.radioGroupReference;
+    radioGroupReference.solution = solution;
+    radioGroupReference.isChosen = true;
+    radioGroupReference.solutionIndex = index;
+    Object.keys(radioGroupReference).forEach((key) => {
+      if (key.startsWith("solution_") && radioGroupReference[key]) {
+        radioGroupReference[key].isChecked = false;
+      }
+    });
+    const chosenRef = radioGroupReference[`solution_${index}`];
+    if (chosenRef) {
+      chosenRef.isChecked = true;
+    }
     console.log(
       `SolverSolutionsChoicePage: setChosenSolution called with solution ${solution}, radioGroupReference updated:`,
-      this.data.radioGroupReference,
+      radioGroupReference,
     );
   }
 
@@ -392,7 +420,7 @@ export class SolverSolutionsChoicePage extends HTMLElement {
                   `SolverSolutionsChoicePage: API response indicates success, solution index: ${index}, solution: ${solution}`,
                 );
                 this.updateScreenContext();
-                Router.go("/solver/sweeper_configuration");
+                Router.go("/solver/sweeper_config");
               }
             } else {
               console.error(

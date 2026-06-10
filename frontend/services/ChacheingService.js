@@ -106,6 +106,7 @@ export default class CacheingService {
         target: "x",
         index: 0,
         fixed: "x = -1",
+        sweeper: "sweeper_data",
         response: {
           ok: true,
           status: 200,
@@ -263,6 +264,7 @@ export default class CacheingService {
       target: target,
       index: index,
       fixed: fixed,
+      sweeper: sweeper,
     } = requestObject || {};
     const verifyFixedCache = this.chache.verifyFixedChache;
     verifyFixedCache.push({
@@ -270,6 +272,7 @@ export default class CacheingService {
       target,
       index,
       fixed,
+      sweeper,
       response,
     });
   }
@@ -279,6 +282,7 @@ export default class CacheingService {
       target: target,
       index: index,
       fixed: fixed,
+      sweeper: sweeper,
     } = requestObject || {};
     const verifyFixedCache = this.chache.verifyFixedChache;
     let chacheResponse = null;
@@ -287,7 +291,8 @@ export default class CacheingService {
         chache.formula_string === formula_string &&
         chache.target === target &&
         chache.index === index &&
-        chache.fixed === fixed
+        chache.fixed === fixed &&
+        chache.sweeper === sweeper
       ) {
         chacheResponse = chache.response;
       }

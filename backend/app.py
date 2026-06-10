@@ -220,15 +220,15 @@ def solve_for_target():
                 "needs_choice": False,
                 "target": None,
                 "available": [],
-                "required_list_str": [],
+                # "required_list_str": [],
                 "formula_string": "",
                 "is_const": False,
                 "is_one_var": False,
                 "is_multi_var": False,
                 "equation_type": "",
-                "index": None,
-                "sweeper": None,
-                "fixed": {}
+                # "index": None,
+                # "sweeper": None,
+                # "fixed": {}
             })
             return jsonify(error), 400
         
@@ -255,15 +255,15 @@ def solve_for_target():
             "error": f"Missing key: {str(e)}",
             "target": None,
             "available": [],
-            "required_list_str": [],
+            # "required_list_str": [],
             "formula_string": "",
             "is_const": False,
             "is_one_var": False,
             "is_multi_var": False,
             "equation_type": "",
-            "index": None,
-            "sweeper": None,
-            "fixed": {}
+            # "index": None,
+            # "sweeper": None,
+            # "fixed": {}
         }), 400
     
     except Exception as e:

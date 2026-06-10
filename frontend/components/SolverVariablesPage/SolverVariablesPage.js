@@ -27,7 +27,7 @@ export class SolverVariablesPage extends HTMLElement {
     super();
     this.root = this.attachShadow({ mode: "open" });
     this.loadCss();
-    this.initData();
+    this.activateData();
   }
 
   loadCss() {
@@ -38,33 +38,33 @@ export class SolverVariablesPage extends HTMLElement {
     console.log("SolverVariablesPage: CSS loaded and appended to shadow root");
   }
 
-  initData() {
-    console.log("SolverVariablesPage: Initializing data for the component");
-    //get data from global app object (set by previous page)
-    const SolverVariablesScreenContext =
-      this.screenContextService.getSolverVariablesPageContext();
+  activateData() {
+    if (
+      !this.data &&
+      !this.screenContextService.getSolverVariablesPageContext().data
+    ) {
+      console.log("SolverVariablesPage: Initializing data for the component");
 
-    this.SolverHomePageData =
-      this.screenContextService.getSolverHomePageContext()?.data || {};
-    this.jsonDataSolverHomePage =
-      this.screenContextService.getSolverHomePageContext()?.json || {};
-    if (SolverVariablesScreenContext?.data?.radioGroupReference) {
-      this.radioGroupReference =
-        SolverVariablesScreenContext.data.radioGroupReference;
+      this.SolverHomePageData =
+        this.screenContextService.getSolverHomePageContext()?.data || {};
+      this.jsonDataSolverHomePage =
+        this.screenContextService.getSolverHomePageContext()?.json || {};
+      this.data = {
+        jsonDataSolverVariablesPage: this.jsonDataSolverVariablesPage,
+        radioGroupReference: this.radioGroupReference,
+        popupState: {
+          isVisible: false,
+          message: "",
+        },
+        currentFormula: "",
+      };
+      this.MyPopupService = new PopupService(this.root, this.data);
+      console.log(
+        "SolverVariablesPage: Data initialized and stored in global app object",
+      );
+    } else {
+      this.recreateStateFromScreenContext();
     }
-    this.data = {
-      jsonDataSolverVariablesPage: this.jsonDataSolverVariablesPage,
-      radioGroupReference: this.radioGroupReference,
-      popupState: {
-        isVisible: false,
-        message: "",
-      },
-      currentFormula: "",
-    };
-    this.MyPopupService = new PopupService(this.root, this.data);
-    console.log(
-      "SolverVariablesPage: Data initialized and stored in global app object",
-    );
   }
 
   updateScreenContext() {
@@ -74,6 +74,25 @@ export class SolverVariablesPage extends HTMLElement {
     this.screenContextService.setSolverVariablesPageContext(
       this.data,
       this.jsonDataSolverVariablesPage,
+    );
+  }
+  recreateStateFromScreenContext() {
+    const solverVariablesPageContext =
+      this.screenContextService.getSolverVariablesPageContext() || {};
+    //destructure data and json from context
+    ({ data: this.data, json: this.jsonDataSolverVariablesPage } =
+      solverVariablesPageContext);
+    this.MyPopupService = new PopupService(this.root, this.data);
+    this.jsonDataSolverHomePage =
+      this.screenContextService.getSolverHomePageContext()?.json || {};
+    this.jsonDataSolverVariablesPage =
+      this.screenContextService.getSolverVariablesPageContext()?.json || {};
+    this.radioGroupReference = this.data.radioGroupReference || {
+      current: "",
+      isChosen: false,
+    };
+    console.log(
+      `SolverVariablesPage: State recreated from screen context with data and JSON`,
     );
   }
 

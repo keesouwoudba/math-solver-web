@@ -50,6 +50,14 @@ const Router = {
         console.log("Router: switch: /solver/solutions");
         pageElement = document.createElement("solver-solutions-choice-page");
         break;
+      case "/solver/sweeper_config":
+        console.log("Router: switch: /solver/sweeper_config");
+        pageElement = document.createElement("plotter-sweeper-config-page");
+        break;
+      case "/plotter/sweep_results":
+        console.log("Router: switch: /plotter/sweep_results");
+        pageElement = document.createElement("plotter-sweeper-results-page");
+        break;
       default:
         console.log(`Router: switch: default for route ${route}`);
         pageElement = document.createElement("main-page");

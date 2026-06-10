@@ -25,6 +25,7 @@ export default class ScreenContextService {
   PlotterSweeperConfigPageData;
   jsonPlotterPassSweeper;
   jsonPlotterVerifyFixed;
+  jsonPlotterPerformSweep;
   plotterSweeperConfigPageHasContext;
 
   constructor() {
@@ -126,6 +127,7 @@ export default class ScreenContextService {
     data,
     jsonSweeper,
     jsonFixed,
+    jsonPerformSweep,
     hasContext = true,
   ) {
     console.log(
@@ -134,6 +136,7 @@ export default class ScreenContextService {
     this.PlotterSweeperConfigPageData = data;
     this.jsonPlotterPassSweeper = jsonSweeper;
     this.jsonPlotterVerifyFixed = jsonFixed;
+    this.jsonPlotterPerformSweep = jsonPerformSweep;
     this.plotterSweeperConfigPageHasContext = hasContext;
     console.log(
       "ScreenContextService: Data and JSON set for PlotterSweeperConfigPage",
@@ -148,6 +151,7 @@ export default class ScreenContextService {
       hasContext: this.plotterSweeperConfigPageHasContext,
       jsonPassSweeper: this.jsonPlotterPassSweeper,
       jsonVerifyFixed: this.jsonPlotterVerifyFixed,
+      jsonPlotterPerformSweep: this.jsonPlotterPerformSweep,
     };
   }
   resetScreenContext() {
@@ -167,8 +171,38 @@ export default class ScreenContextService {
     this.PlotterSweeperConfigPageData = undefined;
     this.jsonPlotterPassSweeper = undefined;
     this.jsonPlotterVerifyFixed = undefined;
+    this.jsonPlotterPerformSweep = undefined;
     this.plotterSweeperConfigPageHasContext = false;
 
     console.log("ScreenContextService: All screen contexts reset");
+  }
+
+  //stateful. returns the latest possible changes in data
+  getCurrentDataState(requestedFields) {
+    const jsonDataSolverVariablesPage = this.jsonDataSolverVariablesPage || {};
+    const jsonDataSolverSolutionsChoicePage =
+      this.jsonDataSolverSolutionsChoicePage || {};
+    const jsonPlotterPassSweeper = this.jsonPlotterPassSweeper || {};
+    const jsonDataSolverHomePage = this.jsonDataSolverHomePage || {};
+    const jsonPlotterVerifyFixed = this.jsonPlotterVerifyFixed || {};
+    const jsonPlotterPerformSweep = this.jsonPlotterPerformSweep || {};
+    return requestedData(requestedFields);
+
+    function requestedData(fields) {
+      const finalObj = {};
+      for (let field of fields) {
+        if (jsonPlotterVerifyFixed[field] !== undefined) {
+          const fieldValue =
+            jsonDataSolverHomePage?.[field] ??
+            jsonDataSolverVariablesPage?.[field] ??
+            jsonDataSolverSolutionsChoicePage?.[field] ??
+            jsonPlotterPassSweeper?.[field] ??
+            jsonPlotterVerifyFixed?.[field] ??
+            jsonPlotterPerformSweep?.[field];
+          finalObj[field] = fieldValue;
+        }
+      }
+      return finalObj;
+    }
   }
 }
