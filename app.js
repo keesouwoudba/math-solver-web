@@ -13,7 +13,7 @@ import { SolverVariablesPage } from "/frontend/components/SolverVariablesPage/So
 import { SolverEquationResultsPage } from "/frontend/components/SolverEquationResultPage/SolverEquationResultsPage.js";
 import { SolverSolutionsChoicePage } from "/frontend/components/SolverSolutionsChoicePage/SolverSolutionsChoicePage.js";
 import { PlotterSweeperConfigPage } from "/frontend/components/PlotterSweeperConfigPage/PlotterSweeperConfigPage.js";
-import { PlotterSweeperResultPage } from "/frontend/components/PlotterSweeperResultPage/PlotterSweeperResultPage.js";
+import { PlotterSweepResultsPage } from "/frontend/components/PlotterSweepResultsPage/PlotterSweepResultsPage.js";
 
 //common components:
 import { StatefulBox } from "/frontend/components/common/StatefulBox.js";

@@ -13,17 +13,23 @@ export default class Handlers {
     return radioGroupReferenceCopy;
   }
 
-  static inputChangeHandler(event) {
+  static handleInputChange(event) {
     const target = event.target;
     if (
-      !(target instanceof HTMLTextAreaElement) ||
+      !(target instanceof HTMLTextAreaElement) &&
       !(target instanceof HTMLInputElement)
     ) {
+      console.warn(
+        `plotterSweeperConfigPagehandler: Input change event ignored, not an input or textarea`,
+      );
       return null;
     }
-    const includesFormInput = target.className.includes("form-input");
-    const includesFormRange = target.className.includes("form-input-range");
-    if (!includesFormInput || !includesFormRange) {
+    const includesFormInput = target.matches(".form-input");
+    const includesFormRange = target.matches(".form-input-range");
+    if (!includesFormInput && !includesFormRange) {
+      console.warn(
+        `plotterSweeperConfigPagehandler: Input change event ignored, not a form input or range`,
+      );
       return null;
     }
     let name;
@@ -32,7 +38,7 @@ export default class Handlers {
       name =
         target.id.split("-")[1] ??
         target.id.match(/^range-(?<name>.+)$/)?.groups?.name;
-      blockKey = "verifyRange";
+      blockKey = "performSweep";
     }
     if (includesFormInput) {
       name =
@@ -40,15 +46,18 @@ export default class Handlers {
         target.id.match(/^const-(?<name>.+)$/)?.groups?.name;
       blockKey = "verifyFixed";
     }
-
-    return {
+    const finalObj = {
       name,
       blockKey,
-      type,
       current: target.value,
       selectionStart: target.selectionStart,
       selectionEnd: target.selectionEnd,
-      isFocused: target.matches(":focus"),
+      isFocused: true,
     };
+    console.warn(
+      `plotterSweeperConfigPagehandler: Input change detected, final:${JSON.stringify(finalObj)}`,
+    );
+
+    return finalObj;
   }
 }

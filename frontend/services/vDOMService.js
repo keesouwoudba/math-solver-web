@@ -28,19 +28,6 @@ export default class VDOMService {
       this.realDOM.append(...this.data.elems);
     } else {
       console.log(`VDOMService: Updating DOM for traceback: ${traceback}`);
-      console.warn(
-        `VDOMService: previous VDOM: `,
-        JSON.stringify(this.data.prevVDOM),
-      );
-      console.warn(`VDOMService: new VDOM: `, JSON.stringify(this.data.vDOM));
-      console.warn(
-        `VDOMService: dynamicVDOM: `,
-        JSON.stringify(this.data.dynamicVDOM),
-      );
-      console.warn(
-        `is dynamicVDOM same object as vDOM? `,
-        this.data.dynamicVDOM === this.data.vDOM,
-      );
       const patches = this.diff(this.data.prevVDOM, this.data.vDOM);
       console.log(`VDOMService: ${traceback} patches: `, patches);
       this.data.elems = this.patch(this.data.elems, patches);
@@ -117,8 +104,7 @@ export default class VDOMService {
         !targetEl ||
         !stateRef ||
         !(targetEl instanceof HTMLInputElement) ||
-        targetEl.type !== "radio" ||
-        targetEl.type !== "checkbox"
+        (targetEl.type !== "radio" && targetEl.type !== "checkbox")
       ) {
         return;
       }
@@ -151,19 +137,29 @@ export default class VDOMService {
             targetEl.setSelectionRange(s, e);
           } catch (e) {
             /* do nothing */
+            console.warn(
+              `VDOMService: Failed to set selection range on element:, element: ${targetEl}, start: ${s}, end: ${e} with error: `,
+            );
           }
         }
       } else if (targetEl instanceof HTMLSelectElement) {
         try {
           targetEl.focus();
         } catch (e) {
-          console.log(`VDOMService: Failed to focus element: `, e);
+          console.warn(
+            `VDOMService: Failed to focus element:, element: ${targetEl} with error: `,
+            e,
+          );
         }
       } else {
         try {
           targetEl.focus();
         } catch (e) {
           /* do nothing */
+          console.warn(
+            `VDOMService: Failed to focus element:, element: ${targetEl} with error: `,
+            e,
+          );
         }
       }
     };
@@ -348,6 +344,7 @@ export default class VDOMService {
         ariaHidden,
         id,
         children,
+        inputmode,
         ["data-target"]: dataTargetAttr,
         ["aria-hidden"]: ariaHiddenAttr,
       } = node;
@@ -387,6 +384,9 @@ export default class VDOMService {
       }
       if (name !== undefined) {
         el.setAttribute("name", name);
+      }
+      if (inputmode !== undefined) {
+        el.setAttribute("inputmode", inputmode);
       }
       const ariaHiddenValue = ariaHidden ?? ariaHiddenAttr;
       if (ariaHiddenValue !== undefined) {

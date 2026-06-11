@@ -37,27 +37,39 @@ export class PlotterSweeperConfigPage extends HTMLElement {
     },
     getConstantsObject() {
       const verifyFixedRefs = this.verifyFixed;
-      const constantsValues = {};
-      let isFilled = true;
+      const constantsData = {};
+      let isOk = true;
+      let errorMessage = "";
       for (let key in verifyFixedRefs) {
         if (key.startsWith("fixed-")) {
           const variableName = key.match(/fixed-(?<name>.+)/)?.groups?.name;
+          let numValue;
           const value = verifyFixedRefs[key].current;
-          if (value === "" || isNaN(Number(value))) {
-            isFilled = false;
+          numValue = Number(value);
+          if (value === "" || Number.isNaN(numValue)) {
+            isOk = false;
+            errorMessage += `Constant ${variableName} has invalid value: "${value}". Please enter a valid number.\n`;
           }
-          constantValues[variableName] = value;
+          constantsData[variableName] = numValue;
         }
       }
-      return [constantValues, isFilled];
+      return { constantsData, isOk, errorMessage };
     },
     getRangeObject() {
       const performSweepRefs = this.performSweep;
-      let rangeValues = {};
+      let rangeData = {};
+      let isOk = true;
+      let errorMessage = "";
       for (let key in performSweepRefs) {
-        rangeValues[key] = performSweepRefs[key].current;
+        const value = performSweepRefs[key].current;
+        const numValue = Number(value);
+        rangeData[key] = numValue;
+        if (rangeData[key] === "" || Number.isNaN(numValue)) {
+          isOk = false;
+          errorMessage += `Range setting ${key} has invalid value: "${rangeData[key]}". Please enter a valid number.\n`;
+        }
       }
-      return rangeValues;
+      return { rangeData, isOk, errorMessage };
     },
     performSweep: {
       start: {
@@ -67,7 +79,7 @@ export class PlotterSweeperConfigPage extends HTMLElement {
         isFocused: false,
       },
       end: { current: 0, selectionStart: 1, selectionEnd: 1, isFocused: false },
-      step: {
+      steps: {
         current: 200,
         selectionStart: 3,
         selectionEnd: 3,
@@ -251,7 +263,8 @@ export class PlotterSweeperConfigPage extends HTMLElement {
     //         //           tag: "input",
     //         //           className: "form-input",
     //         //           id: "const-v",
-    //         //           type: "number",
+    //         //           type: "text",
+    //         //           inputmode: "numeric",
     //         //           value: "10",
     //         //         },
     //         //       ],
@@ -275,7 +288,6 @@ export class PlotterSweeperConfigPage extends HTMLElement {
     //                 {
     //                   tag: "stateful-box",
     //                   stateRef: this.blockReferences.sweeper,
-    //                   textContent: "?",
     //                 },
     //               ],
     //             },
@@ -316,7 +328,8 @@ export class PlotterSweeperConfigPage extends HTMLElement {
     //               tag: "input",
     //               className: "form-input-range",
     //               id: "range-start",
-    //               type: "number",
+    //               type: "text",
+    //               inputmode: "numeric",
     //               value: "0",
     //             },
     //           ],
@@ -335,7 +348,8 @@ export class PlotterSweeperConfigPage extends HTMLElement {
     //               tag: "input",
     //               className: "form-input-range",
     //               id: "range-end",
-    //               type: "number",
+    //               type: "text",
+    //               inputmode: "numeric",
     //               value: "100",
     //             },
     //           ],
@@ -354,7 +368,8 @@ export class PlotterSweeperConfigPage extends HTMLElement {
     //               tag: "input",
     //               className: "form-input-range",
     //               id: "range-steps",
-    //               type: "number",
+    //               type: "text",
+    //               inputmode: "numeric",
     //               value: "50",
     //             },
     //           ],
@@ -561,28 +576,7 @@ export class PlotterSweeperConfigPage extends HTMLElement {
                 className: "sr-only",
                 textContent: "Sweeper Variables",
               },
-              //template that will be dynamically added as variable options:
-              // {
-              //   tag: "div",
-              //   className: "sweeper-variable-option-container",
-              //   children: [
-              //     {
-              //       tag: "label",
-              //       className: "sweeper-variable-option",
-              //       children: [
-              //         {
-              //           tag: "input",
-              //           className: "sweeper-variable-input",
-              //           type: "radio",
-              //           name: "sweeper-variable",
-              //           id: "sweeper-option-t",
-              //           value: "t",
-              //         },
-              //         {tag: "span", className: "sweeper-variable-symbol", textContent: "t"}
-              //       ],
-              //     },
-              //   ],
-              // },
+              //dynamically added here
             ],
           },
           {
@@ -625,10 +619,13 @@ export class PlotterSweeperConfigPage extends HTMLElement {
         const variableOptionNode = {
           tag: "div",
           className: "sweeper-variable-option-container",
+          id: `sweeper-option-container-${variable}`,
           children: [
             {
               tag: "label",
               className: "sweeper-variable-option",
+              for: `sweeper-option-${variable}`,
+              id: `sweeper-option-label-${variable}`,
               children: [
                 {
                   tag: "input",
@@ -671,12 +668,14 @@ export class PlotterSweeperConfigPage extends HTMLElement {
           {
             tag: "div",
             className: "fixed-constants-grid",
+            id: "fixed-constants-grid",
             children: [
               //content will be added dynamically based on constantsList
             ],
           },
           {
             tag: "div",
+            className: "actions-constants",
             id: "actions-constants",
             children: [
               {
@@ -689,9 +688,11 @@ export class PlotterSweeperConfigPage extends HTMLElement {
               {
                 tag: "div",
                 className: "response-block",
+                id: "response-block",
                 children: [
                   {
                     tag: "stateful-box",
+                    id: "response-indicator-verify-fixed",
                     stateRef: this.blockReferences.sweeper,
                     className: "response-indicator pending",
                   },
@@ -720,10 +721,12 @@ export class PlotterSweeperConfigPage extends HTMLElement {
             {
               tag: "div",
               className: "form-field",
+              id: `constant-container-${constant}`,
               children: [
                 {
                   tag: "label",
                   className: "form-label math-inline",
+                  id: `const-label-${constant}`,
                   for: `const-${constant}`,
                   textContent: `${constant}`,
                 },
@@ -731,7 +734,8 @@ export class PlotterSweeperConfigPage extends HTMLElement {
                   tag: "input",
                   className: "form-input",
                   id: `const-${constant}`,
-                  type: "number",
+                  type: "text",
+                  inputmode: "numeric",
                   stateRef,
                 },
               ],
@@ -761,22 +765,26 @@ export class PlotterSweeperConfigPage extends HTMLElement {
         {
           tag: "div",
           className: "range-settings-grid",
+          id: "range-settings-grid",
           children: [
             {
               tag: "div",
               className: "form-input-range-wrapper",
+              id: "range-start-container",
               children: [
                 {
                   tag: "label",
                   className: "form-label",
                   for: "range-start",
+                  id: "range-start-label",
                   textContent: "Start",
                 },
                 {
                   tag: "input",
                   className: "form-input-range",
                   id: "range-start",
-                  type: "number",
+                  type: "text",
+                  inputmode: "numeric",
                   stateRef: this.inputStateReferences.performSweep.start,
                 },
               ],
@@ -784,18 +792,21 @@ export class PlotterSweeperConfigPage extends HTMLElement {
             {
               tag: "div",
               className: "form-input-range-wrapper",
+              id: "range-end-container",
               children: [
                 {
                   tag: "label",
                   className: "form-label",
                   for: "range-end",
+                  id: "range-end-label",
                   textContent: "End",
                 },
                 {
                   tag: "input",
                   className: "form-input-range",
                   id: "range-end",
-                  type: "number",
+                  type: "text",
+                  inputmode: "numeric",
                   stateRef: this.inputStateReferences.performSweep.end,
                 },
               ],
@@ -803,19 +814,22 @@ export class PlotterSweeperConfigPage extends HTMLElement {
             {
               tag: "div",
               className: "form-input-range-wrapper",
+              id: "range-steps-container",
               children: [
                 {
                   tag: "label",
                   className: "form-label",
                   for: "range-steps",
+                  id: "range-steps-label",
                   textContent: "Steps",
                 },
                 {
                   tag: "input",
                   className: "form-input-range",
                   id: "range-steps",
-                  type: "number",
-                  stateRef: this.inputStateReferences.performSweep.step,
+                  type: "text",
+                  inputmode: "numeric",
+                  stateRef: this.inputStateReferences.performSweep.steps,
                 },
               ],
             },
@@ -826,15 +840,14 @@ export class PlotterSweeperConfigPage extends HTMLElement {
     const performSweepNode = {
       tag: "div",
       className: "actions-row",
+      id: "perform-sweep-actions",
       children: [
         {
           tag: "button",
           className: "primary-action-button",
           id: "perform-sweep-button",
           type: "button",
-          children: [
-            { tag: "span", textContent: "Perform Sweep & Generate Plot" },
-          ],
+          textContent: "Perform Sweep & Generate Plot",
         },
       ],
     };
@@ -855,6 +868,8 @@ export class PlotterSweeperConfigPage extends HTMLElement {
       hasPerformSweepVDOM,
     } = state;
     const {
+      formula_string,
+      target,
       is_const,
       is_one_var,
       is_multi_var,
@@ -923,14 +938,17 @@ export class PlotterSweeperConfigPage extends HTMLElement {
         blockRef.state = "pending";
         blockRef.className = "response-indicator pending";
         blockRef.isSuccess = false;
+        blockRef.current = "?";
       } else if (newState === "success") {
         blockRef.state = "success";
         blockRef.className = "response-indicator success";
         blockRef.isSuccess = true;
+        blockRef.current = "✓";
       } else if (newState === "error") {
         blockRef.state = "error";
         blockRef.className = "response-indicator error";
         blockRef.isSuccess = false;
+        blockRef.current = "✗";
       } else {
         console.warn(
           "PlotterSweeperConfigPage: Invalid state provided for block reference",
@@ -947,18 +965,21 @@ export class PlotterSweeperConfigPage extends HTMLElement {
     if (blockRef) {
       const inputStateRef = blockRef[variableKey];
       if (inputStateRef) {
+        console.warn(
+          `PlotterSweeperConfigPage: Applying input state change for blockKey: ${blockKey}, variableKey: ${variableKey}, current: ${current}, selectionStart: ${selectionStart}, selectionEnd: ${selectionEnd}, isFocused: ${isFocused}`,
+        );
         inputStateRef.current = current;
         inputStateRef.selectionStart = selectionStart;
         inputStateRef.selectionEnd = selectionEnd;
         inputStateRef.isFocused = isFocused;
       } else {
         console.warn(
-          "PlotterSweeperConfigPage: Invalid variable key for input state reference",
+          `PlotterSweeperConfigPage: Invalid variable key for input state reference, blockKey: ${blockKey}, variableKey: ${variableKey}, blockref: ${JSON.stringify(blockRef)}`,
         );
       }
     } else {
       console.warn(
-        "PlotterSweeperConfigPage: Invalid block key for input state reference",
+        `PlotterSweeperConfigPage: Invalid block key for input state reference, blockKey: ${blockKey}, variableKey: ${variableKey}, inputStateReferences: ${JSON.stringify(this.inputStateReferences)}`,
       );
     }
   }
@@ -1003,39 +1024,42 @@ export class PlotterSweeperConfigPage extends HTMLElement {
       async (event) => {
         const target = event.target;
         const matchesPassSweeperButton = target.matches("#pass-sweeper-button");
-        const matchesPassConstantsButton = target.matches(
-          "#verify-fixed-button",
-        );
+        const matchesVerifyFixedButton = target.matches("#verify-fixed-button");
         const matchesPerformSweepButton = target.matches(
           "#perform-sweep-button",
         );
         if (
-          !matchesPerformSweepButton ||
-          !matchesPassSweeperButton ||
-          !matchesPassConstantsButton
+          !matchesPerformSweepButton &&
+          !matchesPassSweeperButton &&
+          !matchesVerifyFixedButton
         ) {
+          console.warn(
+            `PlotterSweeperConfigPage: Click event ignored, not a sweeper variable selection, pass sweeper button, verify fixed button, or perform sweep button click, item: `,
+            target,
+          );
           return;
         }
         if (matchesPassSweeperButton) {
           console.log(
             `PlotterSweeperConfigPage: Pass Sweeper button clicked, preparing to handle click event`,
           );
-          await this.passSweeperButtonClick(event);
+          await this.handlePassSweeperButtonClick(event);
         } else if (matchesVerifyFixedButton) {
           console.log(
             `PlotterSweeperConfigPage: VerifyFixed button clicked, preparing data for API call`,
           );
-          await this.verifyFixedConstantsButtonClick(event);
+          await this.handleVerifyFixedConstantsButtonClick(event);
         } else if (matchesPerformSweepButton) {
           console.log(
             `PlotterSweeperConfigPage: Perform Sweep button clicked, preparing data for API call`,
           );
-          await this.performSweepButtonClick(event);
+          await this.handlePerformSweepButtonClick(event);
         }
       },
       { signal },
     );
 
+    //works, but i forgot to do focusing. it doesnt work. i need to investigate. also i need to add listeners to track the posistion of caret, just like i did in solverhomepage
     //3. 5. const inputs: two way data binding. input event-> update inputStateReferences.verifyFixed[`fixed-${variableName}`].current and selectionStart, selectionEnd, isFocused and updateVDOM
     this.root.addEventListener(
       "input",
@@ -1043,18 +1067,18 @@ export class PlotterSweeperConfigPage extends HTMLElement {
         const response = Handlers.handleInputChange(event);
         if (!response) {
           console.warn(
-            `PlotterSweeperConfigPage: Input change event ignored, not a formula input`,
+            `PlotterSweeperConfigPage: Input change event ignored, not a fixed or range input, ${response}`,
           );
           return;
         } else {
           this.MyVDOMService.takeSnapshot(); //take snapshot before state change for undo functionality
           this.applyInputStateChange(
             response.blockKey,
-            `fixed-${response.name}`,
+            `${response.name}`,
             response,
           );
           this.MyVDOMService.updateDOM(
-            `after input change for ${response.name} changes to ${response.current}`,
+            `after input change for ${response.name} changes to ${JSON.stringify(response)}`,
           );
         }
       },
@@ -1062,9 +1086,9 @@ export class PlotterSweeperConfigPage extends HTMLElement {
     );
   }
   //2. pass sweeper button
-  async passSweeperButtonClick(event) {
-    const target = event.target;
-    if (target.matches(".pass-sweeper-button")) {
+  async handlePassSweeperButtonClick(event) {
+    const targetEl = event.target;
+    if (targetEl.matches(".pass-sweeper-button")) {
       console.log(
         `PlotterSweeperConfigPage: Pass Sweeper button clicked, preparing data for API call`,
       );
@@ -1074,12 +1098,16 @@ export class PlotterSweeperConfigPage extends HTMLElement {
           `PlotterSweeperConfigPage: No sweeper variable chosen, cannot pass sweeper`,
         );
         this.toggleBlockReferenceState("sweeper", "error");
+        this.MyVDOMService.updateDOM(
+          "after failed attempt to pass sweeper due to no variable chosen",
+        );
         this.MyPopupService.showErrorPopup(
           "Please select a variable to sweep.",
         );
         return;
       } else {
         try {
+          this.MyVDOMService.takeSnapshot(); //take snapshot before state change for undo functionality
           this.toggleBlockReferenceState("sweeper", "pending");
           console.log(
             `PlotterSweeperConfigPage: Passing sweeper variable "${chosenVariable}" to API`,
@@ -1100,12 +1128,17 @@ export class PlotterSweeperConfigPage extends HTMLElement {
               `PlotterSweeperConfigPage: API call to pass sweeper failed with status ${response.status}`,
             );
             this.toggleBlockReferenceState("sweeper", "error");
+            this.MyVDOMService.updateDOM(
+              "after failed attempt to pass sweeper due to API error",
+            );
             this.MyPopupService.showErrorPopup(
               "Failed to pass the sweeper variable. Please try again.",
             );
+            return;
           } else {
             const responseData = response.data || {};
             this.jsonPlotterPassSweeper = responseData; //update with any new data from response, in case we need it for next steps
+            this.updateScreenContext();
             const { status_bool, required_list_final_str, error } =
               responseData;
             if (!status_bool) {
@@ -1114,8 +1147,12 @@ export class PlotterSweeperConfigPage extends HTMLElement {
               );
               this.toggleBlockReferenceState("sweeper", "error");
               this.MyPopupService.showErrorPopup(
-                `Failed to pass the sweeper variable. Please check your selection and try again. Error: ${error}`,
+                `Failed to pass the sweeper variable. Please check your selection and try again. Error: ${String(error)}`,
               );
+              this.MyVDOMService.updateDOM(
+                "after failed attempt to pass sweeper due to API error",
+              );
+              return;
             } else {
               console.log(
                 `PlotterSweeperConfigPage: Sweeper variable passed successfully, updating VDOM with any required constants if provided`,
@@ -1137,6 +1174,10 @@ export class PlotterSweeperConfigPage extends HTMLElement {
             `PlotterSweeperConfigPage: Error occurred while passing sweeper`,
             error,
           );
+
+          this.MyVDOMService.updateDOM(
+            "after failed attempt to pass sweeper due to error",
+          );
           this.MyPopupService.showErrorPopup(
             "An error occurred while passing the sweeper.",
           );
@@ -1146,16 +1187,20 @@ export class PlotterSweeperConfigPage extends HTMLElement {
   }
   //4. verify fixed button click -> collect all the  data about fixed and api call.
   async handleVerifyFixedButtonClick(event) {
-    const target = event.target;
-    const [constantsData, isFilled] =
+    const targetEl = event.target;
+    const { constantsData, isOk, errorMessage } =
       this.inputStateReferences.getConstantsObject();
-    if (!isFilled) {
+    this.MyVDOMService.takeSnapshot(); //take snapshot before state change for undo functionality
+    if (!isOk) {
       console.warn(
-        `PlotterSweeperConfigPage: Cannot verify fixed constants, not all constant values are filled`,
+        `PlotterSweeperConfigPage: Cannot verify fixed constants: Error: ${errorMessage}`,
       );
       this.toggleBlockReferenceState("fixed", "error");
+      this.MyVDOMService.updateDOM(
+        "after failed attempt to verify fixed constants due to incomplete inputs",
+      );
       this.MyPopupService.showErrorPopup(
-        "Please fill in all constant values before verifying.",
+        `Please fill in all constant values before verifying. Error: ${errorMessage}`,
       );
       return;
     } else {
@@ -1183,6 +1228,9 @@ export class PlotterSweeperConfigPage extends HTMLElement {
             `PlotterSweeperConfigPage: API call to verify fixed constants failed with status ${response.status}`,
           );
           this.toggleBlockReferenceState("fixed", "error");
+          this.MyVDOMService.updateDOM(
+            "after failed attempt to verify fixed constants due to API error",
+          );
           this.MyPopupService.showErrorPopup(
             "Failed to verify the fixed constants. Please try again.",
           );
@@ -1196,8 +1244,11 @@ export class PlotterSweeperConfigPage extends HTMLElement {
               `PlotterSweeperConfigPage: API response indicates failure in verifying fixed constants - ${error}`,
             );
             this.toggleBlockReferenceState("fixed", "error");
+            this.MyVDOMService.updateDOM(
+              `after failed attempt to verify fixed constants due to verification error ${error.error}`,
+            );
             this.MyPopupService.showErrorPopup(
-              `Failed to verify the fixed constants. Please check your inputs and try again. Error: ${error}`,
+              `Failed to verify the fixed constants. Please check your inputs and try again. Error: ${error.error}`,
             );
           } else {
             console.log(
@@ -1220,6 +1271,9 @@ export class PlotterSweeperConfigPage extends HTMLElement {
           `PlotterSweeperConfigPage: Error occurred while verifying fixed constants`,
           error,
         );
+        this.MyVDOMService.updateDOM(
+          "after failed attempt to verify fixed constants due to error",
+        );
         this.MyPopupService.showErrorPopup(
           "An error occurred while verifying the fixed constants.",
         );
@@ -1227,9 +1281,20 @@ export class PlotterSweeperConfigPage extends HTMLElement {
     }
   }
   async handlePerformSweepButtonClick(event) {
-    const target = event.target;
-    const rangeData = this.inputStateReferences.getRangeObject();
+    const targetEl = event.target;
+    const { rangeData, isOk, errorMessage } =
+      this.inputStateReferences.getRangeObject();
+    if (!isOk) {
+      console.warn(
+        `PlotterSweeperConfigPage: Cannot perform sweep: Error: ${errorMessage}`,
+      );
+      this.MyPopupService.showErrorPopup(
+        `Please fill in all range values before performing the sweep. Error: ${errorMessage}`,
+      );
+      return;
+    }
     try {
+      this.MyVDOMService.takeSnapshot(); //take snapshot before state change for undo functionality
       const { formula_string, target, sweeper, index, fixed } =
         this.screenContextService.getCurrentDataState([
           "formula_string",
@@ -1251,17 +1316,24 @@ export class PlotterSweeperConfigPage extends HTMLElement {
         fixed,
         range: rangeData,
       });
-      var { status_bool, error: errorMsg, ok, objectUrl } = response || {};
+      var { status_bool, errorObj, ok, objectUrl } = response || {};
       if (!ok) {
         console.error(
-          `PlotterSweeperConfigPage: API call to perform sweep failed with status ${response.status}`,
+          `PlotterSweeperConfigPage: API call to perform sweep failed with status ${response.status}, error: ${errorObj.error}`,
+          response,
+        );
+        this.MyVDOMService.updateDOM(
+          "after failed attempt to perform sweep due to API error",
         );
         this.MyPopupService.showErrorPopup(
-          `Failed to perform the sweep. Please try again, ${errorMsg}`,
+          `Failed to perform the sweep. Please try again, ${errorObj.error}`,
         );
       } else if (objectUrl == undefined) {
         console.error(
           `PlotterSweeperConfigPage: API call to perform sweep succeeded but without objectUrl`,
+        );
+        this.MyVDOMService.updateDOM(
+          "after failed attempt to perform sweep due to missing objectUrl",
         );
         this.MyPopupService.showErrorPopup(
           "Failed to perform the sweep. Please try again.",
@@ -1275,6 +1347,9 @@ export class PlotterSweeperConfigPage extends HTMLElement {
       console.error(
         `PlotterSweeperConfigPage: Error occurred while performing sweep`,
         error,
+      );
+      this.MyVDOMService.updateDOM(
+        "after failed attempt to perform sweep due to error",
       );
       this.MyPopupService.showErrorPopup(
         "An error occurred while performing the sweep.",

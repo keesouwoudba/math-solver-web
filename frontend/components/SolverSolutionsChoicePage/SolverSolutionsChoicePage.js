@@ -204,20 +204,7 @@ export class SolverSolutionsChoicePage extends HTMLElement {
   }
 
   addFormulaToVDOM() {
-    console.warn(
-      `this.dynamicVDOM at the beginning: `,
-      JSON.stringify(this.dynamicVDOM),
-    );
     const formulaValueContainer = this.dynamicVDOM[0].children[1];
-    console.warn(
-      `SolverSolutionsChoicePage: Adding formula to VDOM, formulaValueContainer reference: formula: ${this.jsonDataSolverVariablesPage?.formula_string}`,
-      formulaValueContainer,
-    );
-    //debug mode
-    console.warn(
-      `this.dynamicVDOM after retrieving formula container: `,
-      JSON.stringify(this.dynamicVDOM),
-    );
 
     if (
       formulaValueContainer &&
@@ -231,16 +218,8 @@ export class SolverSolutionsChoicePage extends HTMLElement {
         },
       ];
     }
-    console.warn(
-      `this.dynamicVDOM after adding formula: `,
-      JSON.stringify(this.dynamicVDOM),
-    );
   }
   addSolutionOptionsToVDOM() {
-    console.warn(
-      `this.dynamicVDOM before adding solution options: `,
-      JSON.stringify(this.dynamicVDOM),
-    );
     console.log(
       `SolverSolutionsChoicePage: Adding solution options to VDOM based on JSON data`,
     );
@@ -251,10 +230,7 @@ export class SolverSolutionsChoicePage extends HTMLElement {
       solutionsGroup,
     );
     const solutionsOptions = this.jsonDataSolverVariablesPage?.solutions;
-    console.warn(
-      `SolverSolutionsChoicePage: solutionsOptions extracted from JSON data`,
-      solutionsOptions,
-    );
+
     if (solutionsOptions && solutionsOptions.length > 1) {
       const radioGroupReference =
         this.data?.radioGroupReference || this.radioGroupReference;
@@ -300,14 +276,6 @@ export class SolverSolutionsChoicePage extends HTMLElement {
         );
         solutionsGroup.push(optionVDOM);
       });
-      console.warn(
-        `solutions group afeter adding solution options: `,
-        JSON.stringify(solutionsGroup),
-      );
-      console.warn(
-        `this.dynamicVDOM after adding solution options: `,
-        JSON.stringify(this.dynamicVDOM),
-      );
     }
   }
   setChosenSolution(solution, index) {

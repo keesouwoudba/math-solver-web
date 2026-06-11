@@ -5,9 +5,9 @@ import API from "../../services/API.js";
 import Router from "../../services/Router.js";
 import UiPopup from "../UiPopup/UiPopup.js";
 
-export class PlotterSweepResultPage extends HTMLElement {
+export class PlotterSweepResultsPage extends HTMLElement {
   constructor() {
     super();
   }
 }
-customElements.define("plotter-sweep-result-page", PlotterSweepResultPage);
+customElements.define("plotter-sweep-results-page", PlotterSweepResultsPage);

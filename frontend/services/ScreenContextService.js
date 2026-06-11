@@ -191,16 +191,14 @@ export default class ScreenContextService {
     function requestedData(fields) {
       const finalObj = {};
       for (let field of fields) {
-        if (jsonPlotterVerifyFixed[field] !== undefined) {
-          const fieldValue =
-            jsonDataSolverHomePage?.[field] ??
-            jsonDataSolverVariablesPage?.[field] ??
-            jsonDataSolverSolutionsChoicePage?.[field] ??
-            jsonPlotterPassSweeper?.[field] ??
-            jsonPlotterVerifyFixed?.[field] ??
-            jsonPlotterPerformSweep?.[field];
-          finalObj[field] = fieldValue;
-        }
+        const fieldValue =
+          jsonPlotterPerformSweep?.[field] ??
+          jsonPlotterVerifyFixed?.[field] ??
+          jsonPlotterPassSweeper?.[field] ??
+          jsonDataSolverSolutionsChoicePage?.[field] ??
+          jsonDataSolverVariablesPage?.[field] ??
+          jsonDataSolverHomePage?.[field]; // ← least complete, lowest priority
+        finalObj[field] = fieldValue;
       }
       return finalObj;
     }

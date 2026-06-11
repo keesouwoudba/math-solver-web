@@ -56,7 +56,7 @@ const Router = {
         break;
       case "/plotter/sweep_results":
         console.log("Router: switch: /plotter/sweep_results");
-        pageElement = document.createElement("plotter-sweeper-results-page");
+        pageElement = document.createElement("plotter-sweep-results-page");
         break;
       default:
         console.log(`Router: switch: default for route ${route}`);
